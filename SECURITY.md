@@ -13,6 +13,12 @@ Email **security@penopta.com** with:
 We aim to acknowledge within a few business days. We will coordinate disclosure
 and credit if you want it.
 
+## Maintainers and agents
+
+This repo is public. Production deploys from it. Do not commit secrets, private
+plans, or routes that skip auth. The binding policy is
+[`docs/opensource-safety.md`](docs/opensource-safety.md).
+
 ## Scope
 
 This repository covers the Penopta web app (`penopta-app`). Related repos:

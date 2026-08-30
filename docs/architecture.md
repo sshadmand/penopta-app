@@ -175,6 +175,9 @@ single-thread push (live “track this chat,” including standalone threads).
 
 No Preview/stage Neon branch for this phase. Local never uses Neon for day-to-day
 dev. The Neon integration injects many aliases; only `DATABASE_URL` is required.
+Do not wire Vercel Preview to Production `DATABASE_URL` or production OAuth
+secrets. This repo is public — [`docs/opensource-safety.md`](opensource-safety.md)
+is mandatory.
 
 `src/lib/db/client.ts` picks the driver: `*.neon.tech` → Neon HTTP; otherwise
 `node-postgres` for Docker TCP.
@@ -237,4 +240,6 @@ src/
     projects/data.ts               # visibility-aware reads
 docker-compose.yml                 # local Postgres
 drizzle/                           # SQL migrations
+docs/architecture.md
+docs/opensource-safety.md          # public-repo / production safety (mandatory)
 ```

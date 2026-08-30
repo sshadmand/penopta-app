@@ -7,6 +7,9 @@ Thanks for your interest in Penopta.
 - Read [`README.md`](README.md) for local setup.
 - Read [`docs/architecture.md`](docs/architecture.md) for schema, auth, and env conventions.
 - Agent/automation contributors: see [`AGENTS.md`](AGENTS.md).
+- This repo is public and deploys to production. Follow
+  [`docs/opensource-safety.md`](docs/opensource-safety.md) — no secrets, private
+  plans, auth bypasses, or Preview-to-prod database wiring.
 
 ## Development setup
 
@@ -26,7 +29,8 @@ Local Postgres runs in Docker on port **5434**. Do not point daily dev at produc
 1. Branch from `main`.
 2. Keep changes focused — one logical change per PR when possible.
 3. Run `npm run lint` before opening.
-4. Do not commit secrets (`.env.local`, production env files, user maps).
+4. Do not commit secrets (`.env.local`, production env files, user maps) or
+   files from `docs/private/`. See [`docs/opensource-safety.md`](docs/opensource-safety.md).
 5. Describe what changed and why in the PR body.
 
 ## Related repositories

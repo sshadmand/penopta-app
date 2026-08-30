@@ -5,8 +5,8 @@
  *   plugins/claude/penopta/…              (installable plugin)
  *   .claude-plugin/marketplace.json       (repo marketplace entry)
  *
- * Does not submit to Anthropic’s directories (maintainer checklist lives in
- * docs/private/claude-directory.md).
+ * Does not submit to Anthropic’s directories (maintainer checklist is local
+ * only — not in this public repo).
  *
  * Usage (from penopta-app):
  *   npm run plugins:publish:claude
@@ -314,7 +314,7 @@ async function main(): Promise<void> {
   console.log("  1. claude plugin marketplace add .");
   console.log("  2. claude plugin install penopta@penopta-claude");
   console.log("  3. Approve Sign in with Penopta, then run /penopta-context or ask to verify.");
-  console.log("Directory listing: see docs/private/claude-directory.md");
+  console.log("Directory listing: follow the local maintainer checklist.");
 }
 
 main().catch((err) => {

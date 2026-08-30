@@ -1,0 +1,43 @@
+---
+description: Mandatory public-repo and production safety — never leak secrets or weaken the live site
+alwaysApply: true
+---
+
+# Open-source safety (mandatory)
+
+This repo is **public**. Production is `app.penopta.com` on Vercel. Follow
+[`docs/opensource-safety.md`](docs/opensource-safety.md) on every change.
+If a task would violate it, **stop** — do not implement a workaround.
+
+## Do not create or commit
+
+- Secrets: `.env*` other than `.env.example`, tokens, DB URLs (except the
+  local Docker example), OAuth secrets, `CRON_SECRET`, user maps
+- Private maintainer files: anything under `docs/private/` except its README;
+  do not add `docs/plans/`
+- Citations of `docs/private/…` in tracked docs, comments, or logs
+- Vercel team / `*.vercel.app` URLs, Neon hostnames, `.vercel/`
+- `*.dmg` / installer zips (Release assets only)
+- Debug/admin/env-dump routes, auth bypasses, hardcoded fallback secrets
+
+```ts
+// Forbidden
+const secret = process.env.CRON_SECRET || "dev-secret";
+
+// Required
+const secret = process.env.CRON_SECRET?.trim();
+if (!secret) return new Response("Not configured.", { status: 500 });
+```
+
+## Do not weaken the live site
+
+- Keep the app login-required; no public project list
+- Keep org-scoped reads; do not authz org data by `owner_user_id` alone
+- Cron stays Bearer `CRON_SECRET` and fails closed if unset
+- `db:wipe` stays localhost-only / refuses Neon
+- No Preview/stage env that reuses Production `DATABASE_URL` or OAuth secrets
+- No `NEXT_PUBLIC_` or client imports for server secrets
+- Logs and API errors stay generic — no tokens, cookies, or connection strings
+
+Unpublished plans go in `docs/private/plans/` (local). Public durable docs go
+in `docs/` (`architecture.md`, `opensource-safety.md`) and `AGENTS.md`.

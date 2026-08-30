@@ -6,6 +6,8 @@ A Vercel-ready Next.js (App Router) app. Authentication is **Better Auth**
 **Hosted:** [app.penopta.com](https://app.penopta.com) · **License:** [MIT](LICENSE)
 
 See [`docs/architecture.md`](docs/architecture.md) for the schema and env split;
+[`docs/opensource-safety.md`](docs/opensource-safety.md) for public-repo and
+production safety (mandatory);
 [`AGENTS.md`](AGENTS.md) for agent-facing rules;
 [`CONTRIBUTING.md`](CONTRIBUTING.md) to run or patch the project locally.
 

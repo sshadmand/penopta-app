@@ -15,6 +15,16 @@ Durable docs stay in [`docs/`](docs/). Unpublished plans and hosted-site notes
 go in `docs/private/` (local only). Do not commit that folder or cite it in
 public docs, comments, or commits.
 
+## Public repo (mandatory)
+
+This repository is **public** and production deploys from it. Follow
+[`docs/opensource-safety.md`](docs/opensource-safety.md) on every change.
+Cursor also loads [`.cursor/rules/opensource-safety.mdc`](.cursor/rules/opensource-safety.mdc).
+
+Do not add files or code that would leak secrets, private maintainer notes,
+Vercel/Neon internals, or a way to skip auth / org checks on the live site.
+If a request needs that, stop and say so. Do not “prototype” around it.
+
 ## Non-negotiable decisions
 
 ### Auth
