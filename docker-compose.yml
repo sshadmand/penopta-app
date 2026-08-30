@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres:17
+    container_name: penopta-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: penopta
+      POSTGRES_PASSWORD: penopta
+      POSTGRES_DB: penopta
+    ports:
+      # Host 5434 to avoid clashing with other local Postgres instances (5432).
+      - "5434:5432"
+    volumes:
+      - penopta-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U penopta -d penopta"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  penopta-db-data:

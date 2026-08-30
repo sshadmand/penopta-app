@@ -1,0 +1,1 @@
+ALTER TABLE "project" ALTER COLUMN "visibility" SET DEFAULT 'public';

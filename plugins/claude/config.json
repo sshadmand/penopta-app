@@ -1,0 +1,25 @@
+{
+  "pluginName": "penopta",
+  "pluginVersion": "0.1.0",
+  "description": "Search Penopta project context in Claude and keep Claude projects in sync via the Penopta MCP connector.",
+  "author": {
+    "name": "Penopta",
+    "email": "support@penopta.com",
+    "url": "https://penopta.com"
+  },
+  "homepage": "https://www.penopta.com/docs/claude-connector",
+  "keywords": ["penopta", "sync", "agents", "mcp", "claude"],
+  "mcpUrl": "https://app.penopta.com/api/mcp",
+  "skills": [
+    {
+      "name": "penopta-context",
+      "description": "Answer questions about Penopta projects, threads, and activity stats using read MCP tools (list, search, get context, get stats). Use for what someone worked on, project status, usage/effort stats, search, verify, or diagnose — not for hourly or bulk sync.",
+      "source": "query-skill.md"
+    },
+    {
+      "name": "penopta-hourly-sync",
+      "description": "Run one Penopta hourly or on-demand bulk sync only: known_projects, make_projects_available, tracked_projects, and sync_threads. Use for scheduled hourly runs or an explicit sync Penopta now request — not for asking what someone worked on.",
+      "source": "sync"
+    }
+  ]
+}

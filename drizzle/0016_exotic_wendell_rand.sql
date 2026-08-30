@@ -1,0 +1,1 @@
+ALTER TABLE "organization" ADD COLUMN "continue_work_enabled" boolean DEFAULT true NOT NULL;

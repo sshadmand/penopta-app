@@ -1,0 +1,21 @@
+#!/bin/sh
+set -e
+
+# Skip merge/rebase so those commits don't get an extra patch bump.
+git_path() {
+  git rev-parse --git-path "$1"
+}
+
+if [ -d "$(git_path rebase-merge)" ] || [ -d "$(git_path rebase-apply)" ] ||
+  [ -f "$(git_path MERGE_HEAD)" ] || [ -f "$(git_path CHERRY_PICK_HEAD)" ]; then
+  exit 0
+fi
+
+# If this commit already changes the version, leave it alone (manual bump).
+if git diff --cached --name-only -- package.json | grep -qx 'package.json' &&
+  git diff --cached -G '"version"' -- package.json | grep -q '"version"'; then
+  exit 0
+fi
+
+npm run version:bump
+git add package.json package-lock.json

@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f7f7f8;
+  --surface: #ffffff;
+  --sidebar: #f4f4f5;
+  --foreground: #18181b;
+  --muted: #71717a;
+  --border: #e4e4e7;
+  --skeleton: #e9e9ec;
+  --accent: #18181b;
+  --accent-foreground: #ffffff;
+  --danger: #dc2626;
+  --danger-foreground: #ffffff;
+  --success: #047857;
+  --success-bg: #ecfdf5;
+  --contrib-out: #f6f8fa;
+  --contrib-0: #ebedf0;
+  --contrib-1: #9be9a8;
+  --contrib-2: #40c463;
+  --contrib-3: #30a14e;
+  --contrib-4: #216e39;
+  --dot-base: 212 212 216;
+  --dot-peak: 113 113 122;
+  color-scheme: light;
+}
+
+.dark {
+  --background: #09090b;
+  --surface: #18181b;
+  --sidebar: #111113;
+  --foreground: #fafafa;
+  --muted: #a1a1aa;
+  --border: #27272a;
+  --skeleton: #27272a;
+  --accent: #fafafa;
+  --accent-foreground: #18181b;
+  --danger: #f87171;
+  --danger-foreground: #18181b;
+  --success: #6ee7b7;
+  --success-bg: #052e1c;
+  --contrib-out: #27272a;
+  --contrib-0: #27272a;
+  --contrib-1: #0e4429;
+  --contrib-2: #006d32;
+  --contrib-3: #26a641;
+  --contrib-4: #39d353;
+  --dot-base: 63 63 70;
+  --dot-peak: 161 161 170;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-sidebar: var(--sidebar);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-skeleton: var(--skeleton);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-contrib-out: var(--contrib-out);
+  --color-contrib-0: var(--contrib-0);
+  --color-contrib-1: var(--contrib-1);
+  --color-contrib-2: var(--contrib-2);
+  --color-contrib-3: var(--contrib-3);
+  --color-contrib-4: var(--contrib-4);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  /* Below default text-xs (0.75rem / 12px) */
+  --text-2xs: 0.625rem; /* 10px */
+  --text-2xs--line-height: 0.875rem;
+  --text-3xs: 0.5rem; /* 8px */
+  --text-3xs--line-height: 0.75rem;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Marker is injected by the Mac WKWebView at document start so this never
+   mutates <html> className (React hydrates that node). */
+html:has(#penopta-mac-app-chrome) * {
+  overscroll-behavior: contain;
+  /* backdrop-filter creates extra compositor layers; tearing them down on
+     reload SIGSEGVs WKWebView on macOS 26 (applyHierarchyUpdates). */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+html:has(#penopta-mac-app-chrome) canvas[aria-hidden] {
+  display: none;
+}
+
+html:has(#penopta-mac-app-chrome),
+html:has(#penopta-mac-app-chrome) body {
+  overscroll-behavior: none;
+}
+
+/* Hairline under the native title bar. Fixed so a 1px body border can't
+   make the document scrollable, then get stuck off-screen after overscroll. */
+html:has(#penopta-mac-app-chrome)::after {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: 1px;
+  background: var(--border);
+  pointer-events: none;
+  z-index: 2147483647;
+}
+
+/* Clickable controls use pointer; CSS can't detect React onClick, so
+   non-disabled buttons and links with href are treated as actionable. */
+a[href],
+button:not(:disabled):not([disabled]),
+[role="button"]:not([aria-disabled="true"]) {
+  cursor: pointer;
+}
+
+@keyframes authenticating-progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.authenticating-bar {
+  width: 100%;
+  animation: authenticating-progress 3s linear forwards;
+}

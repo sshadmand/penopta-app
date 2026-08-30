@@ -1,0 +1,1 @@
+ALTER TABLE "organization" ADD COLUMN "daily_summary_enabled" boolean DEFAULT true NOT NULL;

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "penopta": {
+      "type": "http",
+      "url": "https://app.penopta.com/api/mcp"
+    }
+  }
+}

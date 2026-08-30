@@ -1,0 +1,15 @@
+# dependencies / build
+node_modules
+.next
+out
+build
+coverage
+
+# generated / lockfiles
+package-lock.json
+next-env.d.ts
+*.tsbuildinfo
+
+# env / local
+.env*
+.vercel

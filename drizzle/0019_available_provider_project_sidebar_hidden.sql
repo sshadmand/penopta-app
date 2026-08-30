@@ -1,0 +1,1 @@
+ALTER TABLE "available_provider_project" ADD COLUMN "sidebar_hidden" boolean DEFAULT false NOT NULL;

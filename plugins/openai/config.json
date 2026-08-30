@@ -1,0 +1,46 @@
+{
+  "pluginName": "penopta",
+  "pluginVersion": "0.3.0",
+  "description": "Search Penopta project context in chat and keep ChatGPT/Codex threads in sync.",
+  "author": {
+    "name": "Penopta",
+    "url": "https://penopta.com"
+  },
+  "homepage": "https://app.penopta.com",
+  "keywords": ["penopta", "sync", "agents", "mcp", "chatgpt"],
+  "chatgptAppId": "asdk_app_6a78ebf95cec819181164d470c546eb3",
+  "mcpUrl": "https://app.penopta.com/api/mcp",
+  "skills": [
+    {
+      "name": "penopta-context",
+      "description": "Answer questions about Penopta projects, threads, and activity stats using read MCP tools (list, search, get context, get stats). Use for \"what has X been working on\", project status, usage/effort stats, search, verify, or diagnose - not for hourly or bulk sync.",
+      "source": "query-skill.md"
+    },
+    {
+      "name": "penopta-hourly-sync",
+      "description": "Run one Penopta hourly or on-demand bulk sync only: known_projects, make_projects_available, tracked_projects, and sync_threads. Use for scheduled hourly runs or an explicit \"sync Penopta now\" request - not for asking what someone worked on.",
+      "source": "sync"
+    }
+  ],
+  "interface": {
+    "displayName": "Penopta",
+    "shortDescription": "Keep ChatGPT project threads in sync with Penopta for search, context, and handoffs.",
+    "longDescription": "Penopta connects ChatGPT to your Penopta workspace so agent project work stays searchable and shareable. After you sign in with Penopta, ChatGPT can verify the connection, discover projects, sync opted-in project threads, pull project context into chat, and push a single conversation on demand. Identity and org come from OAuth — no API key to paste. Transcript sync only covers projects you choose to track in Penopta; private projects named with a P: or Private: prefix are never registered or synced.",
+    "developerName": "Penopta",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "websiteURL": "https://penopta.com",
+    "privacyPolicyURL": "https://penopta.com/privacy",
+    "termsOfServiceURL": "https://penopta.com/terms",
+    "brandColor": "#F97316",
+    "defaultPrompt": [
+      "What threads has Sean been working on?",
+      "How much have I been working this week?",
+      "Show which projects Penopta is tracking.",
+      "Run the hourly Penopta sync now.",
+      "Diagnose my latest Penopta sync.",
+      "Verify my Penopta connection.",
+      "Track this chat in Penopta."
+    ]
+  }
+}

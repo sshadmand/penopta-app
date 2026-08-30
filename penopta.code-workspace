@@ -1,0 +1,20 @@
+{
+  "folders": [
+    {
+      "path": ".",
+    },
+    {
+      "path": "../Penopta Sync",
+    },
+    {
+      "path": "../penopta-www",
+    },
+    {
+      "path": "../penopta-claude-plugin",
+    },
+    {
+      "path": "../penopta-linux-sync",
+    },
+  ],
+  "settings": {},
+}

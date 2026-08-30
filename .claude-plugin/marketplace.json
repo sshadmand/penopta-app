@@ -1,0 +1,34 @@
+{
+  "name": "penopta-claude",
+  "owner": {
+    "name": "Penopta",
+    "email": "support@penopta.com",
+    "url": "https://penopta.com"
+  },
+  "metadata": {
+    "description": "Penopta plugins for Claude Code and Cowork",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "penopta",
+      "source": "./plugins/claude/penopta",
+      "description": "Search Penopta project context in Claude and keep Claude projects in sync via the Penopta MCP connector.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Penopta",
+        "email": "support@penopta.com",
+        "url": "https://penopta.com"
+      },
+      "homepage": "https://www.penopta.com/docs/claude-connector",
+      "keywords": [
+        "penopta",
+        "sync",
+        "agents",
+        "mcp",
+        "claude"
+      ],
+      "category": "productivity"
+    }
+  ]
+}
