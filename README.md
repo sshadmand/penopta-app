@@ -19,10 +19,11 @@ production safety (mandatory);
 | [penopta-linux-sync](https://github.com/sshadmand/penopta-linux-sync) | Linux host sync CLI |
 
 The macOS app (Penopta Sync) lives in a private repo. Publish from there with
-`bash scripts/publish.sh`: that uploads `Penopta-Sync.dmg` as a GitHub Release
-asset **on this repo** and writes [`public/downloads/Penopta-Sync.json`](public/downloads/Penopta-Sync.json)
-(`downloadUrl`). Commit the JSON and deploy so the site and the in-app updater
-pick it up. Do not commit the DMG.
+`bash scripts/publish.sh`: that uploads `Penopta-Sync.dmg` and
+`Penopta-Sync.json` as GitHub Release assets **on this repo** (versioned tag
+`macos-sync-<version>.<build>` plus a floating `macos-sync` current pointer).
+The site fetches that JSON and keeps serving `/downloads/Penopta-Sync.json`
+so installed Mac apps do not need a new URL. Do not commit the DMG or JSON.
 
 You can self-host this app or use the hosted product. Self-hosting requires your
 own Postgres, OAuth apps, and env secrets — see `.env.example`.

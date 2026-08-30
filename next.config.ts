@@ -57,6 +57,10 @@ const nextConfig: NextConfig = {
         source: "/install-sync.sh",
         destination: "/api/install-sync",
       },
+      {
+        source: "/downloads/Penopta-Sync.json",
+        destination: "/api/downloads/penopta-sync",
+      },
     ];
   },
 };

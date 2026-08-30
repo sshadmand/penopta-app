@@ -71,10 +71,11 @@ If a request needs that, stop and say so. Do not “prototype” around it.
   `penopta_sync_linux` / UI label “Linux sync”. Do not reuse
   `penopta-sync-macos`. Install: `curl -fsSL https://app.penopta.com/install-sync.sh | sh`.
 - Mac app installer: package from the private Penopta Sync repo
-  (`bash scripts/publish.sh`). The DMG is a GitHub Release asset on **this**
-  repo (`macos-sync-<version>.<build>`); `public/downloads/Penopta-Sync.json`
-  holds `downloadUrl`. Do not commit the DMG. Deploy this web app after
-  publish so the hosted JSON updates.
+  (`bash scripts/publish.sh`). The DMG and JSON are GitHub Release assets on
+  **this** repo (`macos-sync-<version>.<build>` plus a floating `macos-sync`
+  pointer). This app fetches that JSON and keeps serving
+  `/downloads/Penopta-Sync.json`. Do not commit the DMG or JSON. Version bumps
+  do not need a git push or Vercel deploy.
 - Any org member can add/remove **their own** agent threads and source
   (provider) projects on a visible project in the active org. Other members'
   links are left alone. Home sidebar and add/create pickers only show the

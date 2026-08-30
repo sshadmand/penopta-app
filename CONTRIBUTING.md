@@ -41,8 +41,8 @@ Local Postgres runs in Docker on port **5434**. Do not point daily dev at produc
 | [sshadmand/penopta-linux-sync](https://github.com/sshadmand/penopta-linux-sync) | Linux host sync CLI |
 
 The macOS installer is not a git file. Publish from the private Penopta Sync
-repo (`bash scripts/publish.sh`), then commit `public/downloads/Penopta-Sync.json`
-here and deploy. Do not commit `*.dmg`.
+repo (`bash scripts/publish.sh`); GitHub Releases on this repo hold the DMG
+and JSON. Do not commit `*.dmg` or `Penopta-Sync.json`.
 
 ## License
 

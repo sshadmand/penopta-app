@@ -43,9 +43,10 @@ yarn-error.log*
 # Do not use a public stand-in for private plans (see docs/opensource-safety.md)
 /docs/plans/
 
-# Mac installer is a GitHub Release asset, not a git file. Manifest JSON stays.
+# Mac installer is a GitHub Release asset, not a git file. Manifest JSON too.
 /public/downloads/*.dmg
 /public/downloads/*.zip
+/public/downloads/Penopta-Sync.json
 
 __pycache__/
 *.py[cod]

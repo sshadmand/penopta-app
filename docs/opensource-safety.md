@@ -108,9 +108,8 @@ slug (for example `*.vercel.app` hosts under the Vercel team). Do not:
 Production’s public origin is `https://app.penopta.com`. Use that in docs and
 user-facing copy. Self-host docs may say “your `APP_URL`.”
 
-GitHub **Releases** may hold the Mac DMG (not a git file). Commit only
-`public/downloads/Penopta-Sync.json`. Do not commit `*.dmg` / `*.zip`
-installers.
+GitHub **Releases** hold the Mac DMG and `Penopta-Sync.json` (not git files).
+Do not commit `*.dmg` / `*.zip` installers or the version manifest.
 
 ### 5. Logs, errors, and fixtures stay boring
 

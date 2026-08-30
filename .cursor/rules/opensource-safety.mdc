@@ -17,7 +17,7 @@ If a task would violate it, **stop** — do not implement a workaround.
   do not add `docs/plans/`
 - Citations of `docs/private/…` in tracked docs, comments, or logs
 - Vercel team / `*.vercel.app` URLs, Neon hostnames, `.vercel/`
-- `*.dmg` / installer zips (Release assets only)
+- `*.dmg` / installer zips / `Penopta-Sync.json` (Release assets only)
 - Debug/admin/env-dump routes, auth bypasses, hardcoded fallback secrets
 
 ```ts

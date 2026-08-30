@@ -1,6 +1,4 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 
 import { db } from "@/lib/db/client";
 import { agentSyncRuns } from "@/lib/db/schema";
@@ -8,75 +6,12 @@ import type { ProviderProjectProvider } from "@/lib/integrations/provider-projec
 import { PENOPTA_SYNC_AGENT_ID } from "@/lib/integrations/provider-projects-data";
 import { getPublicAppUrl } from "@/lib/integrations/providers";
 
-export type PenoptaSyncRelease = {
-  version: string;
-  build: number;
-  /** MD5 of the published .app contents; used by Mac-repo `scripts/publish.sh`. */
-  contentMd5?: string;
-  downloadPath?: string;
-  downloadUrl?: string;
-  notes?: string;
-  publishedAt?: string;
-};
-
-/**
- * Prefer `PENOPTA_SYNC_DOWNLOAD_URL`, then the manifest `downloadUrl`
- * (GitHub Release asset), then `downloadPath` on this origin (legacy).
- */
-export function getPenoptaSyncDownloadUrl(
-  release?: PenoptaSyncRelease | null,
-): string {
-  const explicit = process.env.PENOPTA_SYNC_DOWNLOAD_URL?.trim();
-  if (explicit) return explicit;
-  const absolute = release?.downloadUrl?.trim();
-  if (absolute) return absolute;
-  const downloadPath = release?.downloadPath?.trim();
-  if (downloadPath) {
-    const normalized = downloadPath.startsWith("/")
-      ? downloadPath
-      : `/${downloadPath}`;
-    return `${getPublicAppUrl()}${normalized}`;
-  }
-  return `${getPublicAppUrl()}/downloads/Penopta-Sync.dmg`;
-}
-
-/** Soft-update manifest (`scripts/publish.sh` in the Mac repo writes it). */
-export function getPenoptaSyncManifestUrl(): string {
-  return `${getPublicAppUrl()}/downloads/Penopta-Sync.json`;
-}
-
-/** Latest published macOS app version from `public/downloads/Penopta-Sync.json`. */
-export async function getPenoptaSyncRelease(): Promise<PenoptaSyncRelease | null> {
-  try {
-    const filePath = path.join(
-      process.cwd(),
-      "public/downloads/Penopta-Sync.json",
-    );
-    const raw = await readFile(filePath, "utf8");
-    const parsed = JSON.parse(raw) as Partial<PenoptaSyncRelease>;
-    if (
-      typeof parsed.version !== "string" ||
-      !parsed.version.trim() ||
-      typeof parsed.build !== "number" ||
-      !Number.isInteger(parsed.build) ||
-      parsed.build < 1
-    ) {
-      return null;
-    }
-    return {
-      version: parsed.version.trim(),
-      build: parsed.build,
-      contentMd5:
-        typeof parsed.contentMd5 === "string" ? parsed.contentMd5 : undefined,
-      downloadPath: parsed.downloadPath,
-      downloadUrl: parsed.downloadUrl,
-      notes: parsed.notes,
-      publishedAt: parsed.publishedAt,
-    };
-  } catch {
-    return null;
-  }
-}
+export type { PenoptaSyncRelease } from "@/lib/integrations/macos-release";
+export {
+  getPenoptaSyncDownloadUrl,
+  getPenoptaSyncManifestUrl,
+  getPenoptaSyncRelease,
+} from "@/lib/integrations/macos-release";
 
 export const macosIntegration = {
   id: "macos" as const,
