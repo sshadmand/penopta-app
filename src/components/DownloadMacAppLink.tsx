@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useSyncExternalStore, type MouseEvent } from "react";
 
 import Apple from "@/components/icons/Apple";
+import { useIsPenoptaMacApp } from "@/lib/auth/native-shell";
 import { integrationPath } from "@/lib/integrations/paths";
 
 const MACOS_HREF = integrationPath("macos");
@@ -43,6 +44,7 @@ export function DownloadMacAppLink({
 }) {
   const pathname = usePathname();
   const isActive = active || pathname === MACOS_HREF;
+  const inMacApp = useIsPenoptaMacApp();
   const dismissed = useSyncExternalStore(
     subscribeToDismiss,
     isDismissed,
@@ -55,7 +57,7 @@ export function DownloadMacAppLink({
     persistDismissed();
   }, []);
 
-  if (dismissed) return null;
+  if (inMacApp || dismissed) return null;
 
   return (
     <div className={`relative ${className ?? ""}`}>
