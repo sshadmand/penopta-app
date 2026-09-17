@@ -31,6 +31,7 @@ const ERROR_MESSAGES: Record<string, string> = {
     "Couldn't link that sign-in method. Please try again.",
   email_does_not_match:
     "That email doesn't match this account. Try another sign-in method.",
+  account_deleted: "Your account and associated data have been deleted.",
 };
 
 export default function HomePage({

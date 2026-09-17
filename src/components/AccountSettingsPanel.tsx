@@ -84,6 +84,8 @@ export function AccountSettingsPanel({
   const [pending, startTransition] = useTransition();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   function addPasskey() {
     const name = defaultPasskeyName(account.name);
@@ -152,6 +154,24 @@ export function AccountSettingsPanel({
       toast.success("Passkey renamed.");
       setEditingId(null);
       setEditingName("");
+      router.refresh();
+    });
+  }
+
+  function deleteAccount() {
+    if (deleteConfirmation !== "DELETE") return;
+
+    startTransition(async () => {
+      const { error } = await authClient.deleteUser({});
+      if (error) {
+        toast.error(
+          error.message ||
+            "Couldn't delete your account. Sign in again and try once more.",
+        );
+        return;
+      }
+
+      router.replace("/?error=account_deleted");
       router.refresh();
     });
   }
@@ -284,6 +304,65 @@ export function AccountSettingsPanel({
         >
           {pending ? "Working…" : "Add new Passkey"}
         </button>
+      </section>
+
+      <section className="rounded-lg border border-danger/40 bg-danger/5 p-4">
+        <p className="text-xs font-semibold tracking-wider text-danger uppercase">
+          Danger zone
+        </p>
+        <h2 className="mt-2 text-sm font-semibold text-foreground">
+          Delete account
+        </h2>
+        <p className="mt-1 text-sm text-muted">
+          Permanently deletes your account, sign-in methods, personal data, and
+          synced content. You&apos;ll be removed from shared organizations;
+          other members&apos; data remains available to them.
+        </p>
+        {!showDeleteConfirmation ? (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => setShowDeleteConfirmation(true)}
+            className="mt-3 inline-flex h-10 items-center rounded-lg border border-danger/50 bg-background px-3 text-sm font-medium text-danger transition hover:bg-danger/10 disabled:opacity-60"
+          >
+            Delete account
+          </button>
+        ) : (
+          <div className="mt-3 rounded-md border border-danger/30 bg-background p-3">
+            <label className="block text-sm font-medium text-foreground">
+              Type DELETE to permanently remove your account
+              <input
+                autoFocus
+                value={deleteConfirmation}
+                onChange={(event) => setDeleteConfirmation(event.target.value)}
+                disabled={pending}
+                aria-label="Type DELETE to confirm account deletion"
+                className="mt-2 h-10 w-full rounded-md border border-border bg-background px-2.5 text-sm text-foreground outline-none transition focus:border-danger disabled:opacity-60"
+              />
+            </label>
+            <div className="mt-3 flex gap-3">
+              <button
+                type="button"
+                disabled={pending || deleteConfirmation !== "DELETE"}
+                onClick={deleteAccount}
+                className="h-9 rounded-md bg-danger px-3 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-60"
+              >
+                {pending ? "Deleting…" : "Permanently delete"}
+              </button>
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => {
+                  setShowDeleteConfirmation(false);
+                  setDeleteConfirmation("");
+                }}
+                className="text-sm font-medium text-muted transition hover:text-foreground disabled:opacity-60"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </section>
     </div>
   );

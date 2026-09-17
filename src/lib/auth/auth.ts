@@ -7,6 +7,7 @@ import { importPKCS8, SignJWT } from "jose";
 
 import { db } from "@/lib/db/client";
 import * as schema from "@/lib/db/schema";
+import { purgeAccountData } from "@/lib/auth/account-deletion";
 import { getPublicAppUrl } from "@/lib/integrations/providers";
 
 /** Auth base URL — same as APP_URL unless BETTER_AUTH_URL is set explicitly. */
@@ -146,6 +147,14 @@ export const auth = betterAuth({
     accountLinking: {
       enabled: true,
       trustedProviders: ["google", "github", "apple"],
+    },
+  },
+  user: {
+    deleteUser: {
+      enabled: true,
+      beforeDelete: async (user) => {
+        await purgeAccountData(user.id);
+      },
     },
   },
   plugins: [
