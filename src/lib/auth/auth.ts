@@ -36,13 +36,25 @@ const appleTeamId = process.env.APPLE_TEAM_ID?.trim();
 const appleKeyId = process.env.APPLE_KEY_ID?.trim();
 const applePrivateKey = process.env.APPLE_PRIVATE_KEY?.trim();
 
+function normalizeApplePrivateKey(value: string | undefined): string | null {
+  if (!value) return null;
+
+  const normalized = value.replace(/\\n/g, "\n").trim();
+  const pemPattern =
+    /^-----BEGIN PRIVATE KEY-----\n[A-Za-z0-9+/=\n]+\n-----END PRIVATE KEY-----$/;
+
+  return pemPattern.test(normalized) ? normalized : null;
+}
+
+const normalizedApplePrivateKey = normalizeApplePrivateKey(applePrivateKey);
+
 /** Apple requires an ES256 JWT client secret, valid for no more than six months. */
 async function appleClientSecret(): Promise<string> {
-  if (!appleClientId || !appleTeamId || !appleKeyId || !applePrivateKey) {
+  if (!appleClientId || !appleTeamId || !appleKeyId || !normalizedApplePrivateKey) {
     throw new Error("Apple Sign In is not configured.");
   }
 
-  const key = await importPKCS8(applePrivateKey.replace(/\\n/g, "\n"), "ES256");
+  const key = await importPKCS8(normalizedApplePrivateKey, "ES256");
   const now = Math.floor(Date.now() / 1_000);
 
   return new SignJWT({})
@@ -56,7 +68,7 @@ async function appleClientSecret(): Promise<string> {
 }
 
 const appleIsConfigured = Boolean(
-  appleClientId && appleTeamId && appleKeyId && applePrivateKey,
+  appleClientId && appleTeamId && appleKeyId && normalizedApplePrivateKey,
 );
 
 function normalizedReviewEmail(value: unknown): string | null {
