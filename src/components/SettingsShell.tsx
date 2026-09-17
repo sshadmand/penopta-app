@@ -108,6 +108,17 @@ export function SettingsShell({
               ))}
             </ul>
           </div>
+
+          <div className="shrink-0 border-t border-border px-3 py-3">
+            <form action="/api/auth/logout" method="post">
+              <button
+                type="submit"
+                className="block w-full rounded-md px-2 py-1.5 text-left text-sm text-muted transition hover:bg-foreground/5 hover:text-foreground"
+              >
+                Sign out
+              </button>
+            </form>
+          </div>
         </>
       }
     >
