@@ -44,6 +44,14 @@ function GitHubMark() {
   );
 }
 
+function AppleMark() {
+  return (
+    <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5 fill-current">
+      <path d="M16.37 12.68c.03 2.84 2.5 3.79 2.53 3.8-.02.07-.39 1.35-1.3 2.67-.78 1.14-1.6 2.27-2.87 2.3-1.24.03-1.64-.74-3.06-.74-1.43 0-1.87.72-3.04.76-1.23.05-2.17-1.23-2.96-2.36-1.61-2.33-2.84-6.59-1.19-9.45.82-1.42 2.29-2.32 3.88-2.34 1.21-.02 2.35.81 3.06.81.71 0 2.05-1 3.45-.85.59.02 2.25.24 3.32 1.81-.09.06-1.98 1.16-1.96 3.59Zm-2.43-7.06c.65-.79 1.08-1.89.96-2.99-.94.04-2.08.63-2.75 1.42-.6.69-1.13 1.8-.99 2.87 1.05.08 2.12-.53 2.78-1.3Z" />
+    </svg>
+  );
+}
+
 function PasskeyMark() {
   return (
     <svg aria-hidden viewBox="0 0 20 20" className="h-5 w-5 fill-current">
@@ -168,6 +176,17 @@ export function SignInCard({
     });
     if (error) {
       setLocalError(error.message || "GitHub sign-in failed. Try again.");
+    }
+  }
+
+  async function continueWithApple() {
+    setLocalError(null);
+    const { error } = await authClient.signIn.social({
+      provider: "apple",
+      callbackURL: afterAuthHref,
+    });
+    if (error) {
+      setLocalError(error.message || "Apple sign-in failed. Try again.");
     }
   }
 
@@ -305,6 +324,16 @@ export function SignInCard({
               >
                 <GitHubMark />
                 Continue with GitHub
+              </button>
+
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => void continueWithApple()}
+                className="flex h-11 w-full items-center justify-center gap-2.5 rounded-lg border border-border bg-surface text-sm font-medium text-foreground transition hover:bg-background disabled:opacity-60"
+              >
+                <AppleMark />
+                Continue with Apple
               </button>
 
               {macApp ? null : (

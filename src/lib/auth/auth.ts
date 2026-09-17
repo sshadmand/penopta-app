@@ -3,6 +3,7 @@ import { APIError, createAuthMiddleware } from "better-auth/api";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { passkey } from "@better-auth/passkey";
+import { importPKCS8, SignJWT } from "jose";
 
 import { db } from "@/lib/db/client";
 import * as schema from "@/lib/db/schema";
@@ -30,6 +31,33 @@ const googleClientId = process.env.GOOGLE_CLIENT_ID?.trim();
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
 const githubClientId = process.env.GITHUB_CLIENT_ID?.trim();
 const githubClientSecret = process.env.GITHUB_CLIENT_SECRET?.trim();
+const appleClientId = process.env.APPLE_CLIENT_ID?.trim();
+const appleTeamId = process.env.APPLE_TEAM_ID?.trim();
+const appleKeyId = process.env.APPLE_KEY_ID?.trim();
+const applePrivateKey = process.env.APPLE_PRIVATE_KEY?.trim();
+
+/** Apple requires an ES256 JWT client secret, valid for no more than six months. */
+async function appleClientSecret(): Promise<string> {
+  if (!appleClientId || !appleTeamId || !appleKeyId || !applePrivateKey) {
+    throw new Error("Apple Sign In is not configured.");
+  }
+
+  const key = await importPKCS8(applePrivateKey.replace(/\\n/g, "\n"), "ES256");
+  const now = Math.floor(Date.now() / 1_000);
+
+  return new SignJWT({})
+    .setProtectedHeader({ alg: "ES256", kid: appleKeyId })
+    .setIssuer(appleTeamId)
+    .setSubject(appleClientId)
+    .setAudience("https://appleid.apple.com")
+    .setIssuedAt(now)
+    .setExpirationTime(now + 180 * 24 * 60 * 60)
+    .sign(key);
+}
+
+const appleIsConfigured = Boolean(
+  appleClientId && appleTeamId && appleKeyId && applePrivateKey,
+);
 
 function normalizedReviewEmail(value: unknown): string | null {
   if (typeof value !== "string") return null;
@@ -68,7 +96,17 @@ export const auth = betterAuth({
           },
         }
       : {}),
+    ...(appleIsConfigured
+      ? {
+          apple: async () => ({
+            clientId: appleClientId!,
+            clientSecret: await appleClientSecret(),
+            appBundleIdentifier: "com.penopta.Penopta-Sync",
+          }),
+        }
+      : {}),
   },
+  trustedOrigins: ["https://appleid.apple.com"],
   emailAndPassword: {
     enabled: true,
     disableSignUp: true,
@@ -95,7 +133,7 @@ export const auth = betterAuth({
   account: {
     accountLinking: {
       enabled: true,
-      trustedProviders: ["google", "github"],
+      trustedProviders: ["google", "github", "apple"],
     },
   },
   plugins: [
