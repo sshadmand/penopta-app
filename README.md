@@ -66,19 +66,18 @@ Open http://localhost:3200 — you’ll see Google / GitHub / Passkey sign-in un
 
 ## How auth works
 
-1. Sign-in UI on `/` calls Better Auth (`/api/auth/*`) for Google/GitHub OAuth or Passkey.
+1. Sign-in UI on `/` calls Better Auth (`/api/auth/*`) for Sign in with Apple, Google, GitHub, or Passkey. Sign in with Apple is the first option.
 2. Sessions are Better Auth cookies; `getSession()` reads them on the server.
 3. After sign-in, use **Add a passkey** in the workspace header to register a passkey
    for next time.
 4. `GET|POST /api/auth/logout` signs out and returns to `/`.
 
-Apple can be wired later via Better Auth `socialProviders`.
-
 ### Mac App Store reviewer sign-in
 
-The Mac app normally offers Google, GitHub, and passkey sign-in. Holding Option
-while clicking **Sign in to Penopta** adds the private App Review handoff switch;
-only that flow displays email/password fields. Better Auth rejects email sign-in
+The Mac app offers Sign in with Apple, Google, GitHub, and passkey. Holding Option
+while clicking **Sign in to Penopta** adds the private App Review handoff switch.
+That screen still leads with Sign in with Apple, then the reviewer email and
+password. Better Auth rejects email sign-in
 for every address except `APP_REVIEW_DEMO_EMAIL`, and public email signup is
 disabled.
 

@@ -23,7 +23,7 @@ function handoffChallengeValue(appReview: boolean): string {
 
 /**
  * Mac app only (`?src=macos`). Website visitors without that query go home.
- * After the existing `/` sign-in (Google / GitHub / passkey in Safari),
+ * After the existing `/` sign-in (Sign in with Apple, Google, GitHub, or passkey in Safari),
  * mints a one-time code and sends the user back to Penopta Sync.
  */
 export async function GET(request: NextRequest) {

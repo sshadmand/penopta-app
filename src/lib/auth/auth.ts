@@ -114,7 +114,10 @@ export const auth = betterAuth({
           apple: async () => ({
             clientId: appleClientId!,
             clientSecret: await appleClientSecret(),
-            appBundleIdentifier: "com.penopta.Penopta-Sync",
+            // Web Sign in with Apple (Safari sheet and the site) issues an
+            // ID token whose audience is the Services ID. Setting
+            // appBundleIdentifier makes Better Auth require the Mac bundle
+            // id instead, so the callback rejects every successful Apple login.
           }),
         }
       : {}),

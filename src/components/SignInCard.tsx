@@ -65,6 +65,26 @@ function PasskeyMark() {
   );
 }
 
+function AppleSignInButton({
+  disabled,
+  onClick,
+}: {
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className="flex h-11 w-full items-center justify-center gap-2.5 rounded-lg bg-black text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-60 dark:bg-white dark:text-black"
+    >
+      <AppleMark />
+      Sign in with Apple
+    </button>
+  );
+}
+
 function isCancelledAuthError(
   message: string | null | undefined,
   code?: string,
@@ -74,7 +94,7 @@ function isCancelledAuthError(
 }
 
 /**
- * Logged-out home. Google / GitHub OAuth + passkey via Better Auth.
+ * Logged-out home. Sign in with Apple is first, then Google, GitHub, and passkey.
  */
 export function SignInCard({
   returnTo,
@@ -209,9 +229,9 @@ export function SignInCard({
       );
       const message =
         isPenoptaMacApp() && cancelled
-          ? "Passkeys don’t work in the Mac app. Use Google or GitHub, or open this site in Safari to use a passkey."
+          ? "Passkeys don’t work in the Mac app. Use Sign in with Apple, Google, or GitHub, or open this site in Safari to use a passkey."
           : error.message ||
-            "Passkey sign-in failed. Sign in with Google or GitHub first, then add a passkey.";
+            "Passkey sign-in failed. Sign in with Apple, Google, or GitHub first, then add a passkey.";
       if (cancelled) {
         toast.error(message);
         return;
@@ -244,18 +264,24 @@ export function SignInCard({
 
         <p className="mt-2 text-center text-sm text-muted">
           {appReview
-            ? "Sign in with the reviewer credentials supplied in App Store Connect."
+            ? "Sign in with Apple, or use the reviewer account from App Store Connect."
             : "Continue to register or sign in."}
         </p>
 
         {appReview ? (
-          <form
-            className="mt-6 space-y-3"
-            onSubmit={(event) => {
-              event.preventDefault();
-              void continueWithReviewAccount();
-            }}
-          >
+          <div className="mt-6 space-y-3">
+            <AppleSignInButton
+              disabled={pending || reviewPending}
+              onClick={() => void continueWithApple()}
+            />
+            <p className="text-center text-xs text-muted">or</p>
+            <form
+              className="space-y-3"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void continueWithReviewAccount();
+              }}
+            >
             <label className="block text-sm font-medium text-foreground">
               Email
               <input
@@ -293,6 +319,7 @@ export function SignInCard({
               {reviewPending ? "Signing in…" : "Sign in for review"}
             </button>
           </form>
+          </div>
         ) : (
           <>
             {/* Conditional UI hint for passkey autofill */}
@@ -306,6 +333,11 @@ export function SignInCard({
             />
 
             <div className="mt-6 space-y-3">
+              <AppleSignInButton
+                disabled={pending}
+                onClick={() => void continueWithApple()}
+              />
+
               <button
                 type="button"
                 disabled={pending}
@@ -324,16 +356,6 @@ export function SignInCard({
               >
                 <GitHubMark />
                 Continue with GitHub
-              </button>
-
-              <button
-                type="button"
-                disabled={pending}
-                onClick={() => void continueWithApple()}
-                className="flex h-11 w-full items-center justify-center gap-2.5 rounded-lg border border-border bg-surface text-sm font-medium text-foreground transition hover:bg-background disabled:opacity-60"
-              >
-                <AppleMark />
-                Continue with Apple
               </button>
 
               {macApp ? null : (
