@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      {
+        "command": "npx --no-install @gruum/cli hook after-file-edit"
+      }
+    ],
+    "stop": [
+      {
+        "command": "npx --no-install @gruum/cli hook stop"
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": "npx --no-install @gruum/cli hook before-shell"
+      }
+    ]
+  }
+}

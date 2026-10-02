@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "gruum": {
+      "command": "npx",
+      "args": [
+        "--yes",
+        "@gruum/cli",
+        "mcp"
+      ]
+    }
+  }
+}

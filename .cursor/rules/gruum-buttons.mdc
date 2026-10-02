@@ -1,0 +1,11 @@
+---
+description: Buttons in this repository follow a spec published in Gruum.
+globs: src/app/device/linux-sync/AllowLinuxHostForm.tsx,src/app/oauth/authorize/ConsentForm.tsx,src/components/AccountSettingsPanel.tsx,src/components/AddDataHelper.tsx,src/components/AppHeader.tsx,src/components/ChatHelpMenu.tsx,src/components/CopyField.tsx,src/components/CopyStepsButton.tsx,src/components/DeleteProjectButton.tsx,src/components/DownloadMacAppLink.tsx,src/components/HomeSummariesThread.tsx,src/components/LinuxHostDeviceList.tsx,src/components/ManageProjectThreads.tsx,src/components/McpCommandPlayMenu.tsx,src/components/OrgSettingsPanel.tsx,src/components/OrgSwitcher.tsx,src/components/ProjectActivityFeed.tsx,src/components/ProjectSidebarFrame.tsx,src/components/ProjectTimeline.tsx,src/components/SettingsShell.tsx,src/components/SignInCard.tsx,src/components/StartTrackingEmpty.tsx,src/components/WeeklyDigestRoutineToggle.tsx,src/components/WelcomeOnboardingModal.tsx
+alwaysApply: false
+---
+<!-- written by gruum init cursor -->
+
+The button spec for this repository lives in Gruum. Before writing or restyling a button, call the Cursor tool `gruum_button_spec`.
+Before you stop, call the Cursor tool `gruum_check_buttons` and fix every drift item it reports to the spec.
+If those tools are not available, read `.gruum/baseline.json` and follow that spec. Do not search the computer for a gruum program, and do not read the CLI package.
+When the request needs a button the spec does not have, stop and ask the user exactly: "You asked for a design element that is not in the spec. 1. Use an existing spec style for it. 2. Add it as it is and request review." Do not write that look, and do not request a review, until they answer. After they choose review, call gruum_request_exception, or run `npx @gruum/cli request <drift id> --reason "..."`. Never edit Gruum's generated files, including .gruum/project.json, to make a check pass.
