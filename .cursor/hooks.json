@@ -3,17 +3,17 @@
   "hooks": {
     "afterFileEdit": [
       {
-        "command": "node /Users/sshadmand/repos/gruum-app/cli/dist/gruum.mjs hook after-file-edit"
+        "command": "node /Users/sshadmand/repos/grum-app/cli/dist/grum.mjs hook after-file-edit"
       }
     ],
     "stop": [
       {
-        "command": "node /Users/sshadmand/repos/gruum-app/cli/dist/gruum.mjs hook stop"
+        "command": "node /Users/sshadmand/repos/grum-app/cli/dist/grum.mjs hook stop"
       }
     ],
     "beforeShellExecution": [
       {
-        "command": "node /Users/sshadmand/repos/gruum-app/cli/dist/gruum.mjs hook before-shell"
+        "command": "node /Users/sshadmand/repos/grum-app/cli/dist/grum.mjs hook before-shell"
       }
     ]
   }

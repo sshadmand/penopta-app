@@ -1,9 +1,9 @@
 {
   "mcpServers": {
-    "gruum": {
+    "grum": {
       "command": "node",
       "args": [
-        "/Users/sshadmand/repos/gruum-app/cli/dist/gruum.mjs",
+        "/Users/sshadmand/repos/grum-app/cli/dist/grum.mjs",
         "mcp"
       ]
     }
