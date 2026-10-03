@@ -3,7 +3,7 @@
     "gruum": {
       "command": "node",
       "args": [
-        "/Users/sshadmand/repos/gruum-app/cli/dist-production/gruum.mjs",
+        "/Users/sshadmand/repos/gruum-app/cli/dist/gruum.mjs",
         "mcp"
       ]
     }
