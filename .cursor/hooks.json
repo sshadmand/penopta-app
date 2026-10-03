@@ -3,17 +3,17 @@
   "hooks": {
     "afterFileEdit": [
       {
-        "command": "npx --no-install @gruum/cli hook after-file-edit"
+        "command": "node /Users/sshadmand/repos/gruum-app/cli/dist-production/gruum.mjs hook after-file-edit"
       }
     ],
     "stop": [
       {
-        "command": "npx --no-install @gruum/cli hook stop"
+        "command": "node /Users/sshadmand/repos/gruum-app/cli/dist-production/gruum.mjs hook stop"
       }
     ],
     "beforeShellExecution": [
       {
-        "command": "npx --no-install @gruum/cli hook before-shell"
+        "command": "node /Users/sshadmand/repos/gruum-app/cli/dist-production/gruum.mjs hook before-shell"
       }
     ]
   }

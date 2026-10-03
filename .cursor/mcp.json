@@ -1,10 +1,9 @@
 {
   "mcpServers": {
     "gruum": {
-      "command": "npx",
+      "command": "node",
       "args": [
-        "--yes",
-        "@gruum/cli",
+        "/Users/sshadmand/repos/gruum-app/cli/dist-production/gruum.mjs",
         "mcp"
       ]
     }
