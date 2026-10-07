@@ -57,3 +57,5 @@ __pycache__/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# Grum local state
+.grum/
