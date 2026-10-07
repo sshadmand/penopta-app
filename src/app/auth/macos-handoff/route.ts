@@ -7,7 +7,11 @@ import {
   MACOS_APP_REVIEW_PARAM,
   MACOS_APP_REVIEW_VALUE,
   MACOS_HANDOFF_SRC,
+  MACOS_OAUTH_PROVIDER_PARAM,
   macosHandoffReturnTo,
+  macosOAuthProvider,
+  postSignInHref,
+  type MacosOAuthProvider,
 } from "@/lib/auth/post-sign-in-url";
 import { loginStartHref } from "@/lib/auth/urls";
 
@@ -23,8 +27,10 @@ function handoffChallengeValue(appReview: boolean): string {
 
 /**
  * Mac app only (`?src=macos`). Website visitors without that query go home.
- * After the existing `/` sign-in (Sign in with Apple, Google, GitHub, or passkey in Safari),
- * mints a one-time code and sends the user back to Penopta Sync.
+ * `provider=google|github` starts that provider immediately. The reviewer
+ * screen (`app_review=1`) still shows the email form. Sign in with Apple
+ * stays in the Mac app. A completed sign-in mints a one-time code and
+ * sends the user back to Penopta Sync.
  */
 export async function GET(request: NextRequest) {
   if (request.nextUrl.searchParams.get("src") !== MACOS_HANDOFF_SRC) {
@@ -34,30 +40,29 @@ export async function GET(request: NextRequest) {
   const appReview =
     request.nextUrl.searchParams.get(MACOS_APP_REVIEW_PARAM) ===
     MACOS_APP_REVIEW_VALUE;
+  const provider = appReview
+    ? null
+    : macosOAuthProvider(
+        request.nextUrl.searchParams.get(MACOS_OAUTH_PROVIDER_PARAM),
+      );
   const challengeValue = handoffChallengeValue(appReview);
 
-  // A Mac sign-in must start at Penopta's sign-in choice, even if the system
-  // browser still carries a session from another account. This prevents App
-  // Review from silently receiving that account instead of the demo account,
-  // without signing the person out of their normal browser workspace. The
-  // short-lived, httpOnly cookie marks the return leg after that choice.
+  // The short-lived cookie marks a sign-in that started in this handoff.
+  // Without it, a browser that is already signed in to Penopta would hand
+  // that account to the Mac app. Google and GitHub skip Penopta's page and
+  // go straight to the provider; the cookie is set on that redirect too.
   const isReturningFromChallenge =
     request.cookies.get(REAUTH_COOKIE)?.value === challengeValue;
   if (!isReturningFromChallenge) {
-    const login = new URL(
-      loginStartHref(macosHandoffReturnTo(appReview)),
-      request.nextUrl.origin,
-    );
-    login.searchParams.set(FORCE_SIGN_IN_PARAM, "1");
-    const response = NextResponse.redirect(login);
-    response.cookies.set(REAUTH_COOKIE, challengeValue, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: request.nextUrl.protocol === "https:",
-      path: "/auth/macos-handoff",
-      maxAge: REAUTH_WINDOW_SECONDS,
-    });
-    return response;
+    if (provider) {
+      const direct = await redirectToOAuthProvider(
+        request,
+        provider,
+        challengeValue,
+      );
+      if (direct) return direct;
+    }
+    return loginChallengeRedirect(request, appReview, challengeValue);
   }
 
   const session = await auth.api.getSession({
@@ -95,12 +100,79 @@ export async function GET(request: NextRequest) {
       "Cache-Control": "no-store",
     },
   });
-  response.cookies.set(REAUTH_COOKIE, "", {
+  response.cookies.set(REAUTH_COOKIE, "", reauthCookieOptions(request, 0));
+  return response;
+}
+
+function loginChallengeRedirect(
+  request: NextRequest,
+  appReview: boolean,
+  challengeValue: string,
+): NextResponse {
+  const login = new URL(
+    loginStartHref(macosHandoffReturnTo(appReview)),
+    request.nextUrl.origin,
+  );
+  login.searchParams.set(FORCE_SIGN_IN_PARAM, "1");
+  const response = NextResponse.redirect(login);
+  response.cookies.set(
+    REAUTH_COOKIE,
+    challengeValue,
+    reauthCookieOptions(request, REAUTH_WINDOW_SECONDS),
+  );
+  return response;
+}
+
+/** Starts Google or GitHub and returns null when that redirect cannot be built. */
+async function redirectToOAuthProvider(
+  request: NextRequest,
+  provider: MacosOAuthProvider,
+  challengeValue: string,
+): Promise<NextResponse | null> {
+  try {
+    const started = await auth.api.signInSocial({
+      body: {
+        provider,
+        callbackURL: postSignInHref(macosHandoffReturnTo(false)),
+        disableRedirect: true,
+      },
+      headers: request.headers,
+      returnHeaders: true,
+    });
+    const authorizeURL = started.response.url;
+    if (!authorizeURL || !isHttpURL(authorizeURL)) return null;
+
+    const response = NextResponse.redirect(authorizeURL);
+    for (const cookie of started.headers.getSetCookie()) {
+      response.headers.append("set-cookie", cookie);
+    }
+    response.cookies.set(
+      REAUTH_COOKIE,
+      challengeValue,
+      reauthCookieOptions(request, REAUTH_WINDOW_SECONDS),
+    );
+    return response;
+  } catch {
+    console.error("macos handoff provider start");
+    return null;
+  }
+}
+
+function isHttpURL(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+function reauthCookieOptions(request: NextRequest, maxAge: number) {
+  return {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "lax" as const,
     secure: request.nextUrl.protocol === "https:",
     path: "/auth/macos-handoff",
-    maxAge: 0,
-  });
-  return response;
+    maxAge,
+  };
 }

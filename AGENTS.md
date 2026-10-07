@@ -30,13 +30,18 @@ If a request needs that, stop and say so. Do not “prototype” around it.
 ### Auth
 
 - Penopta owns identity via **Better Auth** (Google, GitHub, Passkey).
-- Providers: **Google**, **GitHub**, and **Passkey** now; Apple can be added later.
+- Providers: **Apple**, **Google**, **GitHub**, and **Passkey**.
 - The app is **login-required**. There is no logged-out product UI and no public project list.
 - `/` is the sign-in page when logged out (Google + GitHub + Passkey). After sign-in it is the workspace.
-- Mac app sign-in uses a Safari sheet (`ASWebAuthenticationSession`) at
-  `/auth/macos-handoff?src=macos`, then `POST /api/auth/macos/exchange` to
-  copy a session cookie into WKWebView. Do not send website users through
-  those routes; `/` Google / GitHub / Passkey stays as-is.
+- Mac Sign in with Apple stays in the app (`ASAuthorizationController` →
+  `POST /api/auth/macos/apple`). Google and GitHub use
+  `ASWebAuthenticationSession` at
+  `/auth/macos-handoff?src=macos&provider=google|github`, which starts that
+  provider directly, then `POST /api/auth/macos/exchange` copies a session
+  cookie into WKWebView. Do not put Penopta’s sign-in page in front of those
+  providers, and do not offer Sign in with Apple on that browser page. Do not
+  send website users through those routes; `/` Apple / Google / GitHub /
+  Passkey stays as-is.
 - Sign-in CTAs for protected routes use `loginStartHref(returnTo)` → `/?returnTo=…`.
   `/authenticating` only forwards to that. `/login` only forwards auth errors onto `/?error=…`.
 - Session user id comes from Better Auth (`session.user.id`). Use that string as `owner_user_id`.

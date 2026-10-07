@@ -5,6 +5,7 @@ import {
   isMacosAppReviewReturnTo,
   isMacosHandoffReturnTo,
   macosHandoffReturnTo,
+  macosOAuthProvider,
   postSignInHref,
 } from "./post-sign-in-url";
 
@@ -30,6 +31,14 @@ test("recognizes App Review only on the exact Mac handoff", () => {
     isMacosAppReviewReturnTo("/auth/macos-handoff?src=macos&app_review=false"),
     false,
   );
+});
+
+test("accepts only Google and GitHub for the direct Mac handoff", () => {
+  assert.equal(macosOAuthProvider("google"), "google");
+  assert.equal(macosOAuthProvider("github"), "github");
+  assert.equal(macosOAuthProvider("apple"), null);
+  assert.equal(macosOAuthProvider("passkey"), null);
+  assert.equal(macosOAuthProvider(null), null);
 });
 
 test("post-sign-in preserves the full handoff query", () => {

@@ -74,12 +74,11 @@ Open http://localhost:3200 — you’ll see Google / GitHub / Passkey sign-in un
 
 ### Mac App Store reviewer sign-in
 
-The Mac app offers Sign in with Apple, Google, GitHub, and passkey. Holding Option
-while clicking **Sign in to Penopta** adds the private App Review handoff switch.
-That screen still leads with Sign in with Apple, then the reviewer email and
-password. Better Auth rejects email sign-in
-for every address except `APP_REVIEW_DEMO_EMAIL`, and public email signup is
-disabled.
+The Mac app signs in with Apple inside the app. **Sign in with Google** and
+**Sign in with GitHub** each open that provider directly. Holding Option
+shows **Sign in for App Review**, the reviewer email and password screen.
+Better Auth rejects email sign-in for every address except
+`APP_REVIEW_DEMO_EMAIL`, and public email signup is disabled.
 
 Create or rotate the production reviewer account with:
 

@@ -5,6 +5,10 @@ import { nextCookies } from "better-auth/next-js";
 import { passkey } from "@better-auth/passkey";
 import { importPKCS8, SignJWT } from "jose";
 
+import {
+  MACOS_APP_BUNDLE_ID,
+  appleAcceptedClientIds,
+} from "@/lib/auth/apple-native";
 import { db } from "@/lib/db/client";
 import * as schema from "@/lib/db/schema";
 import { purgeAccountData } from "@/lib/auth/account-deletion";
@@ -68,6 +72,8 @@ async function appleClientSecret(): Promise<string> {
     .sign(key);
 }
 
+const appleBundleId =
+  process.env.APPLE_APP_BUNDLE_ID?.trim() || MACOS_APP_BUNDLE_ID;
 const appleIsConfigured = Boolean(
   appleClientId && appleTeamId && appleKeyId && normalizedApplePrivateKey,
 );
@@ -112,12 +118,8 @@ export const auth = betterAuth({
     ...(appleIsConfigured
       ? {
           apple: async () => ({
-            clientId: appleClientId!,
+            clientId: appleAcceptedClientIds(appleClientId!, appleBundleId),
             clientSecret: await appleClientSecret(),
-            // Web Sign in with Apple (Safari sheet and the site) issues an
-            // ID token whose audience is the Services ID. Setting
-            // appBundleIdentifier makes Better Auth require the Mac bundle
-            // id instead, so the callback rejects every successful Apple login.
           }),
         }
       : {}),

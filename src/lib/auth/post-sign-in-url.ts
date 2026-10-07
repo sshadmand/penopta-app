@@ -10,6 +10,19 @@ export const MACOS_HANDOFF_SRC = "macos";
 export const MACOS_APP_REVIEW_PARAM = "app_review";
 export const MACOS_APP_REVIEW_VALUE = "1";
 
+/** Mac app sends this so Google or GitHub starts immediately. */
+export const MACOS_OAUTH_PROVIDER_PARAM = "provider";
+
+const MACOS_OAUTH_PROVIDERS = ["google", "github"] as const;
+export type MacosOAuthProvider = (typeof MACOS_OAUTH_PROVIDERS)[number];
+
+export function macosOAuthProvider(
+  value: string | null,
+): MacosOAuthProvider | null {
+  if (value === "google" || value === "github") return value;
+  return null;
+}
+
 export function macosHandoffReturnTo(appReview = false): string {
   const params = new URLSearchParams({ src: MACOS_HANDOFF_SRC });
   if (appReview) params.set(MACOS_APP_REVIEW_PARAM, MACOS_APP_REVIEW_VALUE);

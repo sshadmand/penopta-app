@@ -10,12 +10,13 @@ import { authClient } from "@/lib/auth/client";
 import { isPenoptaMacApp, useIsPenoptaMacApp } from "@/lib/auth/native-shell";
 import {
   isMacosAppReviewReturnTo,
+  isMacosHandoffReturnTo,
   postSignInHref,
 } from "@/lib/auth/post-sign-in-url";
 
 function GoogleMark() {
   return (
-    <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5">
+    <svg aria-hidden viewBox="0 0 24 24" className="h-6 w-6 shrink-0">
       <path
         fill="#4285F4"
         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
@@ -38,7 +39,7 @@ function GoogleMark() {
 
 function GitHubMark() {
   return (
-    <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5 fill-current">
+    <svg aria-hidden viewBox="0 0 24 24" className="h-6 w-6 shrink-0 fill-current">
       <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2Z" />
     </svg>
   );
@@ -46,7 +47,7 @@ function GitHubMark() {
 
 function AppleMark() {
   return (
-    <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5 fill-current">
+    <svg aria-hidden viewBox="0 0 24 24" className="h-6 w-6 shrink-0 fill-current">
       <path d="M16.37 12.68c.03 2.84 2.5 3.79 2.53 3.8-.02.07-.39 1.35-1.3 2.67-.78 1.14-1.6 2.27-2.87 2.3-1.24.03-1.64-.74-3.06-.74-1.43 0-1.87.72-3.04.76-1.23.05-2.17-1.23-2.96-2.36-1.61-2.33-2.84-6.59-1.19-9.45.82-1.42 2.29-2.32 3.88-2.34 1.21-.02 2.35.81 3.06.81.71 0 2.05-1 3.45-.85.59.02 2.25.24 3.32 1.81-.09.06-1.98 1.16-1.96 3.59Zm-2.43-7.06c.65-.79 1.08-1.89.96-2.99-.94.04-2.08.63-2.75 1.42-.6.69-1.13 1.8-.99 2.87 1.05.08 2.12-.53 2.78-1.3Z" />
     </svg>
   );
@@ -54,7 +55,7 @@ function AppleMark() {
 
 function PasskeyMark() {
   return (
-    <svg aria-hidden viewBox="0 0 20 20" className="h-5 w-5 fill-current">
+    <svg aria-hidden viewBox="0 0 20 20" className="h-6 w-6 shrink-0 fill-current">
       <path
         fillRule="evenodd"
         d="M16.6945 12.1334C16.3969 12.3459 16.3035 12.792 16.562 13.0505C16.8653 13.3538 16.8653 13.8454 16.562 14.1487L16.4444 14.2663C16.0763 14.6345 16.0763 15.2314 16.4444 15.5996C16.8126 15.9678 16.8126 16.5647 16.4444 16.9329L15.6869 17.6905C15.4916 17.8858 15.175 17.8858 14.9798 17.6905L13.8484 16.5592C13.6609 16.3716 13.5556 16.1173 13.5556 15.8521V12.4113C12.5045 11.912 11.7778 10.8407 11.7778 9.59961C11.7778 7.88139 13.1707 6.48849 14.8889 6.48849C16.6071 6.48849 18 7.88139 18 9.59961C18 10.6446 17.4848 11.5693 16.6945 12.1334ZM14.8889 8.26627C15.3798 8.26627 15.7778 8.66424 15.7778 9.15516C15.7778 9.64608 15.3798 10.044 14.8889 10.044C14.398 10.044 14 9.64608 14 9.15516C14 8.66424 14.398 8.26627 14.8889 8.26627Z"
@@ -77,7 +78,7 @@ function AppleSignInButton({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className="flex h-11 w-full items-center justify-center gap-2.5 rounded-lg bg-black text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-60 dark:bg-white dark:text-black"
+      className="flex h-11 w-full items-center justify-center gap-3 rounded-lg bg-black text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-60 dark:bg-white dark:text-black"
     >
       <AppleMark />
       Sign in with Apple
@@ -116,6 +117,7 @@ export function SignInCard({
       : "/";
   const afterAuthHref = postSignInHref(destination);
   const appReview = isMacosAppReviewReturnTo(destination);
+  const macHandoff = isMacosHandoffReturnTo(destination);
 
   useEffect(() => {
     if (errorMessage && isCancelledAuthError(errorMessage)) {
@@ -264,17 +266,14 @@ export function SignInCard({
 
         <p className="mt-2 text-center text-sm text-muted">
           {appReview
-            ? "Sign in with Apple, or use the reviewer account from App Store Connect."
-            : "Continue to register or sign in."}
+            ? "Use the reviewer account from App Store Connect."
+            : macHandoff
+              ? "Continue with Google, GitHub, or a passkey."
+              : "Continue to register or sign in."}
         </p>
 
         {appReview ? (
           <div className="mt-6 space-y-3">
-            <AppleSignInButton
-              disabled={pending || reviewPending}
-              onClick={() => void continueWithApple()}
-            />
-            <p className="text-center text-xs text-muted">or</p>
             <form
               className="space-y-3"
               onSubmit={(event) => {
@@ -333,16 +332,18 @@ export function SignInCard({
             />
 
             <div className="mt-6 space-y-3">
-              <AppleSignInButton
-                disabled={pending}
-                onClick={() => void continueWithApple()}
-              />
+              {macHandoff ? null : (
+                <AppleSignInButton
+                  disabled={pending}
+                  onClick={() => void continueWithApple()}
+                />
+              )}
 
               <button
                 type="button"
                 disabled={pending}
                 onClick={() => void continueWithGoogle()}
-                className="flex h-11 w-full items-center justify-center gap-2.5 rounded-lg border border-border bg-surface text-sm font-medium text-foreground transition hover:bg-background disabled:opacity-60"
+                className="flex h-11 w-full items-center justify-center gap-3 rounded-lg border border-border bg-surface text-sm font-medium text-foreground transition hover:bg-background disabled:opacity-60"
               >
                 <GoogleMark />
                 Continue with Google
@@ -352,7 +353,7 @@ export function SignInCard({
                 type="button"
                 disabled={pending}
                 onClick={() => void continueWithGitHub()}
-                className="flex h-11 w-full items-center justify-center gap-2.5 rounded-lg border border-border bg-surface text-sm font-medium text-foreground transition hover:bg-background disabled:opacity-60"
+                className="flex h-11 w-full items-center justify-center gap-3 rounded-lg border border-border bg-surface text-sm font-medium text-foreground transition hover:bg-background disabled:opacity-60"
               >
                 <GitHubMark />
                 Continue with GitHub
@@ -363,7 +364,7 @@ export function SignInCard({
                   type="button"
                   disabled={pending}
                   onClick={() => void continueWithPasskey()}
-                  className="flex h-11 w-full items-center justify-center gap-2.5 rounded-lg border border-border bg-surface text-sm font-medium text-foreground transition hover:bg-background disabled:opacity-60"
+                  className="flex h-11 w-full items-center justify-center gap-3 rounded-lg border border-border bg-surface text-sm font-medium text-foreground transition hover:bg-background disabled:opacity-60"
                 >
                   <PasskeyMark />
                   Continue with Passkey
