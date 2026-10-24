@@ -33,6 +33,7 @@
     "brandColor": "#F97316",
     "defaultPrompt": [
       "What threads has Sean been working on?",
+      "How much have I been working this week?",
       "Show which projects Penopta is tracking.",
       "Run the hourly Penopta sync now.",
       "Diagnose my latest Penopta sync.",
