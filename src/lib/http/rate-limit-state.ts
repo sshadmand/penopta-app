@@ -7,6 +7,7 @@ export const RATE_LIMITS = {
   macosExchange: { limit: 30, windowMs: 60 * 1000 },
   macosApple: { limit: 20, windowMs: 60 * 1000 },
   agentSync: { limit: 60, windowMs: 60 * 1000 },
+  skillsSync: { limit: 60, windowMs: 60 * 1000 },
   mcp: { limit: 120, windowMs: 60 * 1000 },
 } as const;
 

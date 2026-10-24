@@ -359,6 +359,8 @@ async function ProjectDetailContent({
             projectId={project.id}
             skills={skillRows.map(toSkillPublic)}
             hasLlmKey={hasLlmKey}
+            isOwner={isOwner}
+            commitToRepo={project.skillsCommitToRepo}
             userNames={skillUserNames}
             threadTitles={Object.fromEntries(
               threads.map((t) => [t.id, t.title || "Untitled thread"]),

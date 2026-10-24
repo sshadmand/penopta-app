@@ -1,5 +1,6 @@
 "use server";
 
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import {
@@ -10,7 +11,12 @@ import {
 import { friendlyLlmErrorMessage } from "@/lib/ai/errors";
 import { NoLlmCredentialError } from "@/lib/ai/resolve";
 import { getSession } from "@/lib/auth/server";
-import type { ProjectRow, ProjectSkillKind } from "@/lib/db/schema";
+import { db } from "@/lib/db/client";
+import {
+  projects,
+  type ProjectRow,
+  type ProjectSkillKind,
+} from "@/lib/db/schema";
 import { resolveActiveOrg } from "@/lib/orgs/data";
 import { insertProjectChatMessage } from "@/lib/projects/chat-data";
 import { getVisibleProject } from "@/lib/projects/data";
@@ -188,6 +194,27 @@ export async function restoreProjectSkillRevisionAction(
     model: null,
   });
   if (!saved) return { ok: false, error: STALE_ERROR };
+  refresh(ctx.project.id);
+  return { ok: true };
+}
+
+/**
+ * Owner-only: let sync apps leave this workgroup's skill files out of the
+ * repo's local git exclude so the team can commit them.
+ */
+export async function setSkillsCommitToRepoAction(
+  projectId: string,
+  commitToRepo: boolean,
+): Promise<ActionResult> {
+  const ctx = await resolveContext(projectId);
+  if (!ctx.ok) return ctx;
+  if (ctx.project.ownerUserId !== ctx.userId) {
+    return { ok: false, error: "Only the workgroup owner can change this." };
+  }
+  await db
+    .update(projects)
+    .set({ skillsCommitToRepo: commitToRepo, updatedAt: new Date() })
+    .where(and(eq(projects.id, ctx.project.id), eq(projects.orgId, ctx.orgId)));
   refresh(ctx.project.id);
   return { ok: true };
 }

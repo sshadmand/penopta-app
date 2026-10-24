@@ -15,6 +15,7 @@ import {
   restoreProjectSkillRevisionAction,
   saveProjectSkillAction,
   setProjectSkillStatusAction,
+  setSkillsCommitToRepoAction,
   type SkillInput,
 } from "@/lib/skills/actions";
 import type {
@@ -38,10 +39,14 @@ export function ProjectSkillsPanel({
   hasLlmKey,
   userNames,
   threadTitles,
+  isOwner,
+  commitToRepo,
 }: {
   projectId: string;
   skills: ProjectSkillPublic[];
   hasLlmKey: boolean;
+  isOwner: boolean;
+  commitToRepo: boolean;
   userNames: Record<string, string>;
   /** Threads in this workgroup, for evidence links. */
   threadTitles: Record<string, string>;
@@ -100,6 +105,12 @@ export function ProjectSkillsPanel({
           </div>
         </div>
 
+        <RepoDelivery
+          projectId={projectId}
+          isOwner={isOwner}
+          commitToRepo={commitToRepo}
+        />
+
         <Section
           title="Rules"
           hint="One-line always / never conventions."
@@ -155,6 +166,67 @@ export function ProjectSkillsPanel({
         </Section>
       </div>
     </main>
+  );
+}
+
+/** How skills reach repos, plus the owner's commit-to-git switch. */
+function RepoDelivery({
+  projectId,
+  isOwner,
+  commitToRepo,
+}: {
+  projectId: string;
+  isOwner: boolean;
+  commitToRepo: boolean;
+}) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+
+  function toggle(next: boolean) {
+    startTransition(async () => {
+      const result = await setSkillsCommitToRepoAction(projectId, next);
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success(
+        next ? "Skill files can be committed" : "Skill files stay out of git",
+      );
+      router.refresh();
+    });
+  }
+
+  return (
+    <div className="mt-6 rounded-xl border border-border bg-sidebar px-4 py-3 text-sm">
+      <p className="text-foreground">
+        The{" "}
+        <Link
+          href="/settings/integrations/macos"
+          className="font-medium underline-offset-2 hover:underline"
+        >
+          Penopta Mac app
+        </Link>{" "}
+        writes these into each teammate&apos;s repos for this workgroup, where
+        Claude Code, Cursor, and Codex pick them up. Each person can turn that
+        off in the app.
+      </p>
+      <label
+        className={`mt-3 flex items-start gap-2 text-xs ${isOwner ? "text-foreground" : "text-muted"}`}
+      >
+        <input
+          type="checkbox"
+          className="mt-0.5"
+          checked={commitToRepo}
+          disabled={!isOwner || pending}
+          onChange={(e) => toggle(e.target.checked)}
+        />
+        <span>
+          Let people commit skill files to git. Off: files stay local (added to
+          the repo&apos;s <code className="font-mono">.git/info/exclude</code>).
+          {isOwner ? null : " Only the workgroup owner can change this."}
+        </span>
+      </label>
+    </div>
   );
 }
 
