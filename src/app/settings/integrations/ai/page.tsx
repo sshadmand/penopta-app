@@ -19,8 +19,9 @@ export default function AiIntegrationsPage() {
       <p className="mt-1 text-sm text-muted">
         Bring your own Claude, Gemini, or ChatGPT API key for this organization.
         Keys stay encrypted at rest and are only used server-side — for project
-        chat, <span className="font-medium text-foreground">/summary</span>, and{" "}
-        <span className="font-medium text-foreground">/continue</span>. Chat
+        chat, <span className="font-medium text-foreground">/summary</span>,{" "}
+        <span className="font-medium text-foreground">/continue</span>, and{" "}
+        <span className="font-medium text-foreground">/distill</span>. Chat
         subscriptions (Plus/Pro) do not cover API keys. New keys are checked
         live before they are saved.
       </p>

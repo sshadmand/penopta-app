@@ -733,7 +733,7 @@ export function ProjectTimeline({
                 disabled={pending}
                 placeholder={
                   hasLlmKey
-                    ? "Ask about this workgroup… /summary 24h or /continue"
+                    ? "Ask about this workgroup… /summary 24h, /continue, or /distill"
                     : "Add an AI key under Integrations to chat"
                 }
                 onChange={(e) => setValue(e.target.value)}

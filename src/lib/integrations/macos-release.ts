@@ -104,6 +104,18 @@ export function getPenoptaSyncDownloadUrl(
   return macosSyncGithubDmgUrl();
 }
 
+/** Mac App Store listing for Penopta Sync. */
+export const PENOPTA_SYNC_APP_STORE_URL =
+  "https://apps.apple.com/app/penopta-sync/id6806655959";
+
+/**
+ * The direct-download (DMG) URL, only when `PENOPTA_SYNC_DOWNLOAD_URL` is set.
+ * Null means send people to the Mac App Store instead.
+ */
+export function getPenoptaSyncDirectDownloadUrl(): string | null {
+  return process.env.PENOPTA_SYNC_DOWNLOAD_URL?.trim() || null;
+}
+
 /** Soft-update manifest URL the Mac app already hits. */
 export function getPenoptaSyncManifestUrl(): string {
   return `${getPublicAppUrl()}/downloads/Penopta-Sync.json`;

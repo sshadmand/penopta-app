@@ -10,10 +10,12 @@ import { loginStartHref } from "@/lib/auth/urls";
 import {
   chatgptMacosInstallHelpHref,
   claudeMacosInstallHelpHref,
-  getPenoptaSyncDownloadUrl,
+  getPenoptaSyncDirectDownloadUrl,
   getPenoptaSyncInstallStatus,
   getPenoptaSyncRelease,
   macosIntegration,
+  PENOPTA_SYNC_APP_STORE_URL,
+  type MacosInstallChannel,
 } from "@/lib/integrations/macos";
 import { INTEGRATIONS_PATH, integrationPath } from "@/lib/integrations/paths";
 import { resolveActiveOrg } from "@/lib/orgs/data";
@@ -42,7 +44,19 @@ export default async function MacosIntegrationPage() {
     getPenoptaSyncInstallStatus(activeOrg.id),
     getPenoptaSyncRelease(),
   ]);
-  const downloadUrl = getPenoptaSyncDownloadUrl(release);
+  // A direct DMG only when the site is configured for it; otherwise the
+  // Mac App Store listing.
+  const directUrl = getPenoptaSyncDirectDownloadUrl();
+  const channel: MacosInstallChannel = directUrl ? "direct" : "app-store";
+  const steps =
+    channel === "direct"
+      ? macosIntegration.directSteps
+      : macosIntegration.appStoreSteps;
+  // App Store installs skip the fine print; "Get help from chat" covers it.
+  const notes =
+    channel === "direct"
+      ? [...macosIntegration.directNotes, ...macosIntegration.notes]
+      : [];
   const downloadLabel = release
     ? `Download MacOS App (v${release.version})`
     : "Download MacOS App";
@@ -50,45 +64,45 @@ export default async function MacosIntegrationPage() {
   const installInstructions = (
     <>
       <div>
-        <h2 className="text-sm font-semibold tracking-wide text-foreground uppercase">
-          Why the macOS app
-        </h2>
-        <p className="mt-2 text-sm leading-relaxed text-muted">
-          {macosIntegration.description}
-        </p>
-      </div>
-
-      <div>
         <h3 className="text-xs font-semibold tracking-wide text-muted uppercase">
           Steps
         </h3>
         <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed text-foreground">
-          {macosIntegration.steps.map((step) => (
+          {steps.map((step) => (
             <li key={step}>{renderStepText(step)}</li>
           ))}
         </ol>
       </div>
 
       <a
-        href={downloadUrl}
+        href={directUrl ?? PENOPTA_SYNC_APP_STORE_URL}
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-foreground px-4 text-sm font-medium text-background transition hover:opacity-90"
       >
-        <Download className="size-4" aria-hidden />
-        {downloadLabel}
+        {directUrl ? (
+          <>
+            <Download className="size-4" aria-hidden />
+            {downloadLabel}
+          </>
+        ) : (
+          <>
+            <Apple className="size-4" />
+            Get it on the Mac App Store
+          </>
+        )}
       </a>
 
       <ChatHelpMenu
         options={[
           {
             label: "Ask Claude",
-            href: claudeMacosInstallHelpHref(),
+            href: claudeMacosInstallHelpHref(channel),
             provider: "claude",
           },
           {
             label: "Ask ChatGPT",
-            href: chatgptMacosInstallHelpHref(),
+            href: chatgptMacosInstallHelpHref(channel),
             provider: "chatgpt",
           },
         ]}
@@ -154,10 +168,10 @@ export default async function MacosIntegrationPage() {
         </section>
       )}
 
-      {macosIntegration.notes.length ? (
+      {notes.length ? (
         <section className="mt-8 max-w-2xl">
           <ul className="space-y-1 text-xs text-muted">
-            {macosIntegration.notes.map((note) => (
+            {notes.map((note) => (
               <li key={note}>• {note}</li>
             ))}
           </ul>

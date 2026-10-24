@@ -183,6 +183,13 @@
       "when": 1788020000000,
       "tag": "0025_rate_limit_bucket",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1792827018517,
+      "tag": "0026_project_skills",
+      "breakpoints": true
     }
   ]
 }

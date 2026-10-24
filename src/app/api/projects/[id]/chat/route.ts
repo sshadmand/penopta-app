@@ -7,6 +7,11 @@ import {
 } from "@/lib/ai/continue-project";
 import { utcDayKey } from "@/lib/ai/daily-summary";
 import {
+  distillMeta,
+  distillProjectSkills,
+  formatDistillResult,
+} from "@/lib/ai/distill-project-skills";
+import {
   friendlyLlmErrorMessage,
   REVIEW_INTEGRATIONS_META,
   shouldLinkReviewIntegrations,
@@ -54,10 +59,15 @@ function isContinueCommand(name: string): boolean {
   return name === "continue";
 }
 
+function isDistillCommand(name: string): boolean {
+  return name === "distill";
+}
+
 function isKnownChatCommand(name: string): boolean {
   return (
     isSummaryCommand(name) ||
     isContinueCommand(name) ||
+    isDistillCommand(name) ||
     isTestSummaryCommand(name)
   );
 }
@@ -258,6 +268,31 @@ async function completeAssistantTurn(opts: {
     return;
   }
 
+  if (opts.command && isDistillCommand(opts.command.name)) {
+    try {
+      const result = await distillProjectSkills({
+        orgId: opts.orgId,
+        project: opts.project,
+        threads,
+        all: opts.command.arg?.toLowerCase() === "all",
+      });
+      await insertProjectChatMessage({
+        orgId: opts.orgId,
+        projectId: opts.project.id,
+        role: "assistant",
+        text: formatDistillResult(result, opts.project.id),
+        meta: distillMeta(result),
+      });
+    } catch (err) {
+      await insertLlmErrorMessage({
+        orgId: opts.orgId,
+        projectId: opts.project.id,
+        err,
+      });
+    }
+    return;
+  }
+
   try {
     const recentChat = await listProjectChatMessages(
       opts.project.id,
@@ -384,7 +419,7 @@ export async function POST(
       orgId: activeOrg.id,
       projectId: project.id,
       role: "assistant",
-      text: `Unknown command \`/${command.name}\`. Try a normal question, \`/summary 24h\`, or \`/continue\`.`,
+      text: `Unknown command \`/${command.name}\`. Try a normal question, \`/summary 24h\`, \`/continue\`, or \`/distill\`.`,
       isError: true,
     });
     return NextResponse.json({ messages: [userMessage, assistantMessage] });
@@ -394,6 +429,8 @@ export async function POST(
     command && isSummaryCommand(command.name) ? command : null;
   const continueCommand =
     command && isContinueCommand(command.name) ? command : null;
+  const distillCommand =
+    command && isDistillCommand(command.name) ? command : null;
 
   after(async () => {
     await completeAssistantTurn({
@@ -401,7 +438,7 @@ export async function POST(
       project,
       text,
       userMessageId: userMessage.id,
-      command: summaryCommand ?? continueCommand,
+      command: summaryCommand ?? continueCommand ?? distillCommand,
     });
   });
 

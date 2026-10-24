@@ -17,6 +17,7 @@ import {
   ProjectSidebarFrame,
   ProjectSidebarToggle,
 } from "@/components/ProjectSidebarFrame";
+import { ProjectSkillsPanel } from "@/components/ProjectSkillsPanel";
 import { ProjectTimeline } from "@/components/ProjectTimeline";
 import { ProjectVisibilityControl } from "@/components/ProjectVisibilityControl";
 import { ProjectChromeFallback } from "@/components/RouteFallback";
@@ -39,6 +40,7 @@ import { toOrgSwitcherItems } from "@/lib/orgs/view";
 import { buildProjectActivityFeed } from "@/lib/projects/activity-feed";
 import { listProjectChatMessages } from "@/lib/projects/chat-data";
 import { getVisibleProject } from "@/lib/projects/data";
+import { listProjectSkills, toSkillPublic } from "@/lib/skills/data";
 import { activityBucketsFromThreads } from "@/lib/stats/preview";
 import {
   listExplicitProjectThreadIds,
@@ -61,7 +63,7 @@ export default function ProjectDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ thread?: string; activity?: string }>;
+  searchParams: Promise<{ thread?: string; activity?: string; view?: string }>;
 }) {
   return (
     <Suspense fallback={<ProjectChromeFallback />}>
@@ -75,14 +77,21 @@ async function ProjectDetailContent({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ thread?: string; activity?: string }>;
+  searchParams: Promise<{ thread?: string; activity?: string; view?: string }>;
 }) {
   const { id } = await params;
-  const { thread: threadParam, activity: activityParam } = await searchParams;
+  const {
+    thread: threadParam,
+    activity: activityParam,
+    view: viewParam,
+  } = await searchParams;
   const focusActivityIndex = parseFocusActivityIndex(activityParam);
+  const showSkills = !threadParam && viewParam === "skills";
   const returnPath = threadParam
     ? `/projects/${id}?thread=${threadParam}`
-    : `/projects/${id}`;
+    : showSkills
+      ? `/projects/${id}?view=skills`
+      : `/projects/${id}`;
   const session = await getSession();
   if (!session) redirect(loginStartHref(returnPath));
 
@@ -103,6 +112,7 @@ async function ProjectDetailContent({
     myLinkedSourceIds,
     hasLlmKey,
     chatMessages,
+    skillRows,
   ] = await Promise.all([
     listProjectThreads(project.id, activeOrg.id),
     listOwnedAgentThreads(session.user.id),
@@ -114,10 +124,14 @@ async function ProjectDetailContent({
     }),
     hasAnyOrgLlmCredential(activeOrg.id),
     listProjectChatMessages(project.id, activeOrg.id),
+    listProjectSkills(project.id, activeOrg.id),
   ]);
 
   const [memberNames, ownerNames] = await Promise.all([
-    lookupUsers(members.map((m) => m.userId)),
+    lookupUsers([
+      ...members.map((m) => m.userId),
+      ...skillRows.map((s) => s.updatedByUserId ?? ""),
+    ]),
     resolveThreadOwnerNames(threads, session),
   ]);
   const sourceProjects = mySources.map(toSourceProjectOption);
@@ -147,6 +161,18 @@ async function ProjectDetailContent({
       ? "You"
       : (memberNames.get(m.userId)?.name ?? m.userId),
   );
+
+  const activeSkillCount = skillRows.filter(
+    (s) => s.status === "active",
+  ).length;
+  const skillUserNames: Record<string, string> = {};
+  for (const s of skillRows) {
+    if (!s.updatedByUserId) continue;
+    skillUserNames[s.updatedByUserId] =
+      s.updatedByUserId === session.user.id
+        ? "You"
+        : (memberNames.get(s.updatedByUserId)?.name ?? "A teammate");
+  }
 
   const user = session.user;
   const isOwner = project.ownerUserId === user.id;
@@ -212,14 +238,28 @@ async function ProjectDetailContent({
           <div className="flex min-h-0 flex-1 flex-col px-4 pt-5">
             <Link
               href={`/projects/${project.id}`}
-              aria-current={selectedThread ? undefined : "page"}
-              className={`-mx-1 mb-3 block shrink-0 truncate rounded-md px-2 py-1.5 text-sm transition ${
-                selectedThread
+              aria-current={selectedThread || showSkills ? undefined : "page"}
+              className={`-mx-1 block shrink-0 truncate rounded-md px-2 py-1.5 text-sm transition ${
+                selectedThread || showSkills
                   ? "text-foreground hover:bg-foreground/5"
                   : "bg-foreground/10 font-medium text-foreground"
               }`}
             >
               Workgroup home
+            </Link>
+            <Link
+              href={`/projects/${project.id}?view=skills`}
+              aria-current={showSkills ? "page" : undefined}
+              className={`-mx-1 mb-3 flex shrink-0 items-center justify-between gap-2 rounded-md px-2 py-1.5 text-sm transition ${
+                showSkills
+                  ? "bg-foreground/10 font-medium text-foreground"
+                  : "text-foreground hover:bg-foreground/5"
+              }`}
+            >
+              <span className="truncate">Skills</span>
+              {activeSkillCount > 0 ? (
+                <span className="text-xs text-muted">{activeSkillCount}</span>
+              ) : null}
             </Link>
 
             <div className="flex shrink-0 items-center justify-between gap-2">
@@ -314,6 +354,16 @@ async function ProjectDetailContent({
               </div>
             </div>
           </main>
+        ) : showSkills ? (
+          <ProjectSkillsPanel
+            projectId={project.id}
+            skills={skillRows.map(toSkillPublic)}
+            hasLlmKey={hasLlmKey}
+            userNames={skillUserNames}
+            threadTitles={Object.fromEntries(
+              threads.map((t) => [t.id, t.title || "Untitled thread"]),
+            )}
+          />
         ) : (
           <ProjectTimeline
             key={project.id}

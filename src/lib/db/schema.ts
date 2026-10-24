@@ -43,11 +43,16 @@ export const organizations = pgTable("organization", {
    * daily project summaries. Team orgs only; skipped for personal spaces.
    * On by default alongside daily summaries; owners can opt out.
    */
-  weeklyDigestEnabled: boolean("weekly_digest_enabled")
-    .notNull()
-    .default(true),
+  weeklyDigestEnabled: boolean("weekly_digest_enabled").notNull().default(true),
   /** ISO week last emailed (`YYYY-Www`) so the cron is idempotent. */
   weeklyDigestLastWeekKey: text("weekly_digest_last_week_key"),
+  /**
+   * When true, a daily cron distills new workgroup threads into skills and
+   * rules. Off by default; needs an LLM key.
+   */
+  skillDistillEnabled: boolean("skill_distill_enabled")
+    .notNull()
+    .default(false),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -114,6 +119,15 @@ export const projects = pgTable("project", {
   visibility: text("visibility", { enum: ["public", "private"] })
     .notNull()
     .default("public"),
+  /** Threads synced after this are new input for the next skill distill. */
+  skillsDistilledThrough: timestamp("skills_distilled_through", {
+    withTimezone: true,
+  }),
+  /**
+   * When true, the Mac app leaves this workgroup's skill files out of the
+   * repo's local git exclude so they can be committed.
+   */
+  skillsCommitToRepo: boolean("skills_commit_to_repo").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -537,6 +551,105 @@ export const projectChatMessages = pgTable(
 
 export type ProjectChatMessageRow = typeof projectChatMessages.$inferSelect;
 
+export const PROJECT_SKILL_KINDS = ["skill", "rule"] as const;
+export type ProjectSkillKind = (typeof PROJECT_SKILL_KINDS)[number];
+
+export type ProjectSkillEvidence = {
+  agentThreadId: string;
+  timestamp: string | null;
+  excerpt: string;
+};
+
+/**
+ * Workgroup skills (step-by-step workflows) and rules (one-line always/never
+ * conventions). Distilled from linked threads or written by members. Live as
+ * soon as they exist; members can edit or turn them off. Shared with whoever
+ * can see the workgroup.
+ */
+export const projectSkills = pgTable(
+  "project_skill",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orgId: uuid("org_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    kind: text("kind", { enum: PROJECT_SKILL_KINDS }).notNull(),
+    /** Kebab-case, unique per workgroup. Used for file and folder names. */
+    slug: text("slug").notNull(),
+    title: text("title").notNull(),
+    /** "Use when…" line agents match on. Empty for rules. */
+    description: text("description").notNull().default(""),
+    /** Markdown steps for skills; the rule text for rules. */
+    body: text("body").notNull(),
+    status: text("status", { enum: ["active", "off"] })
+      .notNull()
+      .default("active"),
+    /** Set once a person edits it; distill then leaves it alone. */
+    humanEdited: boolean("human_edited").notNull().default(false),
+    sourceThreadIds: jsonb("source_thread_ids")
+      .$type<string[]>()
+      .notNull()
+      .default([]),
+    evidence: jsonb("evidence")
+      .$type<ProjectSkillEvidence[]>()
+      .notNull()
+      .default([]),
+    /** Auth user id of the last editor; null when the AI wrote it. */
+    updatedByUserId: text("updated_by_user_id"),
+    /** `provider/model` of the last AI write. */
+    model: text("model"),
+    version: integer("version").notNull().default(1),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("project_skill_project_slug_uidx").on(t.projectId, t.slug),
+    index("project_skill_project_status_idx").on(t.projectId, t.status),
+    index("project_skill_org_idx").on(t.orgId),
+  ],
+);
+
+export type ProjectSkillRow = typeof projectSkills.$inferSelect;
+
+/** Snapshot of a skill at each version, for history and restore. */
+export const projectSkillRevisions = pgTable(
+  "project_skill_revision",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    skillId: uuid("skill_id")
+      .notNull()
+      .references(() => projectSkills.id, { onDelete: "cascade" }),
+    orgId: uuid("org_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    version: integer("version").notNull(),
+    title: text("title").notNull(),
+    description: text("description").notNull(),
+    body: text("body").notNull(),
+    status: text("status", { enum: ["active", "off"] }).notNull(),
+    updatedByUserId: text("updated_by_user_id"),
+    model: text("model"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("project_skill_revision_skill_version_uidx").on(
+      t.skillId,
+      t.version,
+    ),
+  ],
+);
+
+export type ProjectSkillRevisionRow = typeof projectSkillRevisions.$inferSelect;
+
 /**
  * Stats-page Q&A for one viewer in an org. Separate from project timeline
  * chat — these turns only appear under Settings → Stats.
@@ -820,8 +933,9 @@ export type OAuthTokenRow = typeof oauthTokens.$inferSelect;
  */
 export const rateLimitBuckets = pgTable("rate_limit_bucket", {
   key: text("key").primaryKey(),
-  windowStartedAt: timestamp("window_started_at", { withTimezone: true })
-    .notNull(),
+  windowStartedAt: timestamp("window_started_at", {
+    withTimezone: true,
+  }).notNull(),
   hitCount: integer("hit_count").notNull().default(0),
 });
 
