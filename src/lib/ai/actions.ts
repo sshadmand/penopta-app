@@ -6,6 +6,7 @@ import {
   deleteOrgLlmCredential,
   upsertOrgLlmCredential,
 } from "@/lib/ai/credentials";
+import { setOrgSkillDistillEnabled } from "@/lib/ai/daily-skills";
 import { setOrgDailySummaryEnabled } from "@/lib/ai/daily-summary";
 import {
   runWeeklyOrgDigests,
@@ -135,6 +136,34 @@ export async function setDailySummaryEnabledAction(input: {
   }
 }
 
+/** Toggle the daily skill distill routine (owners only). */
+export async function setSkillDistillEnabledAction(input: {
+  enabled: boolean;
+}): Promise<LlmCredentialActionState> {
+  const session = await getSession();
+  if (!session) return { ok: false, error: "Sign in to update settings." };
+
+  try {
+    const { activeOrg, role } = await resolveActiveOrg(session.user.id);
+    if (role !== "owner") {
+      return {
+        ok: false,
+        error: "Only organization owners can change the daily skills routine.",
+      };
+    }
+
+    await setOrgSkillDistillEnabled(activeOrg.id, input.enabled);
+    revalidateAiSettings();
+    return { ok: true };
+  } catch (err) {
+    console.error("setSkillDistillEnabledAction", err);
+    return {
+      ok: false,
+      error: "Couldn't update the daily skills setting. Try again.",
+    };
+  }
+}
+
 /** Toggle the Monday team progress email (owners only; team orgs). */
 export async function setWeeklyDigestEnabledAction(input: {
   enabled: boolean;
@@ -198,7 +227,10 @@ export async function sendWeeklyDigestNowAction(): Promise<WeeklyDigestSendState
       force: true,
     });
     if (result.skippedNoEmail > 0) {
-      return { ok: false, error: "Email isn't configured in this environment." };
+      return {
+        ok: false,
+        error: "Email isn't configured in this environment.",
+      };
     }
     if (result.failed > 0 && result.emailed === 0) {
       return { ok: false, error: "Couldn't send the snapshot. Try again." };
@@ -213,4 +245,3 @@ export async function sendWeeklyDigestNowAction(): Promise<WeeklyDigestSendState
     return { ok: false, error: "Couldn't send the snapshot. Try again." };
   }
 }
-

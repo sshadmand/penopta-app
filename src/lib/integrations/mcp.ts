@@ -132,6 +132,25 @@ export function listMcpTools(): McpToolInfo[] {
         "To ground an answer in what has actually happened in a workgroup, or to pick up the human's unfinished objectives.",
     },
     {
+      name: "penopta_list_skills",
+      title: "List skills",
+      category: "read",
+      listOnPage: true,
+      summary:
+        "Lists the team's skills and rules distilled from workgroup threads. Rules come with their text.",
+      whenToUse:
+        "Before starting work in a repo, to follow team conventions and find a proven workflow for the task.",
+    },
+    {
+      name: "penopta_get_skill",
+      title: "Get skill",
+      category: "read",
+      listOnPage: true,
+      summary: "Returns one skill's full steps, or one rule's text.",
+      whenToUse:
+        "After penopta_list_skills, when a skill's 'use when' line matches the task.",
+    },
+    {
       name: "penopta_search_threads",
       title: "Search threads",
       category: "read",

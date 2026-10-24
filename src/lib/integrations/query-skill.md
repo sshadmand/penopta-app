@@ -26,11 +26,14 @@ All answers come from **Penopta MCP tools**. Prefer these in order:
    - `penopta_list_projects` — list/filter projects (optional `query`)
    - `penopta_search_threads` — keyword search across threads (optional `project`, `limit`)
 2. **Deepen**
-   - `penopta_get_project_context` — project + condensed linked-thread context
+   - `penopta_get_project_context` — project + condensed linked-thread context, plus the workgroup's rules and skill index
    - `penopta_get_thread` — full thread detail by internal `thread_id`
-3. **Stats**
+3. **Team skills and rules**
+   - `penopta_list_skills` — the workgroup's distilled skills ("use when" + title) and rules (with text). Optional `project`, `query`. Follow rules; pick a matching skill.
+   - `penopta_get_skill` — one skill's full steps by `project` + `slug`
+4. **Stats**
    - `penopta_get_stats` — estimated tokens, sessions, streaks, and effort by plan/project/agent/person. Optional `range` (`1d`–`1y`, default `6m`), `person` (`me` default, `all` for the org, or a name), `agent`, `project`, `timezone` (IANA; default UTC), `lens`.
-4. **Connection**
+5. **Connection**
    - `penopta_verify` — confirm auth + org when setup is unclear
    - `penopta_diagnose` — OAuth / last sync / triage when tools seem missing or sync looks broken
 

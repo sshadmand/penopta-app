@@ -13,6 +13,7 @@ import type { ProviderProjectProvider } from "@/lib/integrations/provider-projec
 import type { ApiKeyOwner } from "@/lib/keys/data";
 import { getLatestAssistantMessageByMetaPrefix } from "@/lib/projects/chat-data";
 import { getVisibleProject, listVisibleProjects } from "@/lib/projects/data";
+import { listProjectSkills } from "@/lib/skills/data";
 import {
   getAgentThread,
   listAgentThreads,
@@ -134,7 +135,111 @@ export type McpProjectContext = {
     text: string;
     postedAt: string;
   } | null;
+  /** Active one-line rules for this workgroup. Follow them. */
+  rules: McpSkillIndexEntry[];
+  /** Active skills (no bodies); fetch one with penopta_get_skill. */
+  skills: McpSkillIndexEntry[];
 };
+
+export type McpSkillIndexEntry = {
+  project: { id: string; slug: string; name: string };
+  kind: "skill" | "rule";
+  slug: string;
+  title: string;
+  /** "Use when…" line for skills; empty for rules. */
+  description: string;
+  /** Rule text for rules; omitted for skills (use penopta_get_skill). */
+  body?: string;
+};
+
+export type McpSkillDetail = McpSkillIndexEntry & {
+  body: string;
+  updatedAt: string;
+  sourceThreadIds: string[];
+};
+
+async function activeSkillIndex(
+  project: ProjectRow,
+  orgId: string,
+): Promise<McpSkillIndexEntry[]> {
+  const rows = await listProjectSkills(project.id, orgId);
+  return rows
+    .filter((s) => s.status === "active")
+    .map((s) => ({
+      project: { id: project.id, slug: project.slug, name: project.name },
+      kind: s.kind,
+      slug: s.slug,
+      title: s.title,
+      description: s.description,
+      ...(s.kind === "rule" ? { body: s.body } : {}),
+    }));
+}
+
+/**
+ * Active skills and rules in one visible workgroup, or across every visible
+ * workgroup in the active org. Optional substring filter.
+ */
+export async function mcpListSkills(
+  owner: ApiKeyOwner,
+  opts: { projectRef?: string; query?: string },
+): Promise<McpSkillIndexEntry[] | null> {
+  let scope: ProjectRow[];
+  if (opts.projectRef) {
+    const project = await getVisibleProject(
+      opts.projectRef,
+      owner.orgId,
+      owner.ownerUserId,
+    );
+    if (!project) return null;
+    scope = [project];
+  } else {
+    scope = await listVisibleProjects({
+      orgId: owner.orgId,
+      viewerUserId: owner.ownerUserId,
+    });
+  }
+
+  const entries = (
+    await Promise.all(scope.map((p) => activeSkillIndex(p, owner.orgId)))
+  ).flat();
+  const needle = opts.query?.trim().toLowerCase();
+  if (!needle) return entries;
+  return entries.filter((e) =>
+    [e.slug, e.title, e.description, e.body ?? ""]
+      .join("\n")
+      .toLowerCase()
+      .includes(needle),
+  );
+}
+
+/** One active skill or rule, with its full body. */
+export async function mcpGetSkill(
+  owner: ApiKeyOwner,
+  projectRef: string,
+  slug: string,
+): Promise<McpSkillDetail | null> {
+  const project = await getVisibleProject(
+    projectRef,
+    owner.orgId,
+    owner.ownerUserId,
+  );
+  if (!project) return null;
+  const rows = await listProjectSkills(project.id, owner.orgId);
+  const row = rows.find(
+    (s) => s.slug === slug.trim().toLowerCase() && s.status === "active",
+  );
+  if (!row) return null;
+  return {
+    project: { id: project.id, slug: project.slug, name: project.name },
+    kind: row.kind,
+    slug: row.slug,
+    title: row.title,
+    description: row.description,
+    body: row.body,
+    updatedAt: row.updatedAt.toISOString(),
+    sourceThreadIds: row.sourceThreadIds,
+  };
+}
 
 /**
  * A project plus condensed context from every thread linked to it. This is the
@@ -151,12 +256,15 @@ export async function mcpGetProjectContext(
   );
   if (!project) return null;
 
-  const threads = await listProjectThreads(project.id, owner.orgId);
-  const continueMsg = await getLatestAssistantMessageByMetaPrefix(
-    project.id,
-    owner.orgId,
-    CONTINUE_WORK_META_PREFIX,
-  );
+  const [threads, continueMsg, skillIndex] = await Promise.all([
+    listProjectThreads(project.id, owner.orgId),
+    getLatestAssistantMessageByMetaPrefix(
+      project.id,
+      owner.orgId,
+      CONTINUE_WORK_META_PREFIX,
+    ),
+    activeSkillIndex(project, owner.orgId),
+  ]);
   return {
     project: toProject(project),
     threadCount: threads.length,
@@ -164,6 +272,8 @@ export async function mcpGetProjectContext(
     continueWork: continueMsg
       ? { text: continueMsg.text, postedAt: continueMsg.createdAt }
       : null,
+    rules: skillIndex.filter((e) => e.kind === "rule"),
+    skills: skillIndex.filter((e) => e.kind === "skill"),
   };
 }
 

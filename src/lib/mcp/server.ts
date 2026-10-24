@@ -39,7 +39,9 @@ import {
 import type { ApiKeyOwner } from "@/lib/keys/data";
 import {
   mcpGetProjectContext,
+  mcpGetSkill,
   mcpGetThread,
+  mcpListSkills,
   mcpListProjects,
   mcpSearchThreads,
 } from "@/lib/mcp/data";
@@ -48,9 +50,11 @@ import {
   diagnoseOutputSchema,
   fetchOutputSchema,
   knownProjectsOutputSchema,
+  listSkillsOutputSchema,
   listProjectsOutputSchema,
   makeProjectsAvailableOutputSchema,
   mcpProjectContextSchema,
+  mcpSkillDetailSchema,
   mcpThreadDetailSchema,
   readAnnotations,
   searchOutputSchema,
@@ -255,10 +259,12 @@ export function buildPenoptaMcpServer(
       description:
         "Penopta: return a workgroup plus condensed context from every conversation " +
         "thread linked to it (objectives, status summaries, next actions, open " +
-        "questions), and the latest continue-work brief when one exists — the " +
+        "questions), the latest continue-work brief when one exists — the " +
         "human's current objectives and the next prompt to pick up while they " +
-        "are away. Use this to ground an answer in what has actually happened " +
-        "in the workgroup, and to continue unfinished work.",
+        "are away — plus the workgroup's rules (follow them) and an index of " +
+        "its skills (fetch one with penopta_get_skill). Use this to ground an " +
+        "answer in what has actually happened in the workgroup, and to " +
+        "continue unfinished work.",
       inputSchema: z.object({
         project: z
           .string()
@@ -274,6 +280,64 @@ export function buildPenoptaMcpServer(
       if (!context)
         return errorResult(`No visible workgroup matching "${project}".`);
       return jsonResult(context);
+    },
+  );
+
+  server.registerTool(
+    "penopta_list_skills",
+    {
+      title: "List workgroup skills",
+      description:
+        "Penopta: list the team's skills (named workflows with a 'use when' " +
+        "line) and rules (one-line conventions) distilled from workgroup " +
+        "threads. Rules include their text — follow them. For a skill that " +
+        "matches the task, call penopta_get_skill for its steps. Scope to one " +
+        "workgroup, or omit it to list across every workgroup you can see.",
+      inputSchema: z.object({
+        project: z
+          .string()
+          .optional()
+          .describe(
+            "Optional workgroup id or slug from penopta_list_projects.",
+          ),
+        query: z
+          .string()
+          .optional()
+          .describe("Optional text to filter skills and rules."),
+      }),
+      outputSchema: listSkillsOutputSchema,
+      annotations: readAnnotations,
+    },
+    async ({ project, query }) => {
+      const skills = await mcpListSkills(owner, { projectRef: project, query });
+      if (!skills)
+        return errorResult(`No visible workgroup matching "${project}".`);
+      return jsonResult({ skills });
+    },
+  );
+
+  server.registerTool(
+    "penopta_get_skill",
+    {
+      title: "Get workgroup skill",
+      description:
+        "Penopta: return one skill's full steps (or one rule's text) by " +
+        "workgroup and slug, as listed by penopta_list_skills. Follow the " +
+        "steps when the task matches its 'use when' line.",
+      inputSchema: z.object({
+        project: z.string().describe("Workgroup id or slug."),
+        slug: z.string().describe("Skill or rule slug."),
+      }),
+      outputSchema: mcpSkillDetailSchema,
+      annotations: readAnnotations,
+    },
+    async ({ project, slug }) => {
+      const skill = await mcpGetSkill(owner, project, slug);
+      if (!skill)
+        return errorResult(
+          `No active skill "${slug}" in a visible workgroup matching "${project}".`,
+        );
+      return jsonResult(skill);
     },
   );
 

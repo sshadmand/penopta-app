@@ -70,6 +70,25 @@ export const mcpThreadDetailSchema = mcpThreadSummarySchema.extend({
   ),
 });
 
+export const mcpSkillIndexEntrySchema = z.object({
+  project: z.object({ id: z.string(), slug: z.string(), name: z.string() }),
+  kind: z.enum(["skill", "rule"]),
+  slug: z.string(),
+  title: z.string(),
+  description: z.string(),
+  body: z.string().optional(),
+});
+
+export const listSkillsOutputSchema = z.object({
+  skills: z.array(mcpSkillIndexEntrySchema),
+});
+
+export const mcpSkillDetailSchema = mcpSkillIndexEntrySchema.extend({
+  body: z.string(),
+  updatedAt: z.string(),
+  sourceThreadIds: z.array(z.string()),
+});
+
 export const mcpProjectContextSchema = z.object({
   project: mcpProjectSchema,
   threadCount: z.number(),
@@ -80,6 +99,8 @@ export const mcpProjectContextSchema = z.object({
       postedAt: z.string(),
     })
     .nullable(),
+  rules: z.array(mcpSkillIndexEntrySchema),
+  skills: z.array(mcpSkillIndexEntrySchema),
 });
 
 export const availableProviderProjectSchema = z.object({

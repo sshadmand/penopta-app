@@ -63,6 +63,8 @@ export const PENOPTA_MCP_TOOL_NAMES = [
   "penopta_diagnose",
   "penopta_list_projects",
   "penopta_get_project_context",
+  "penopta_list_skills",
+  "penopta_get_skill",
   "penopta_search_threads",
   "penopta_get_thread",
   "penopta_get_stats",

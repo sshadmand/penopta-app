@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { AiKeysPanel } from "@/components/AiKeysPanel";
 import { DailySummaryRoutineToggle } from "@/components/DailySummaryRoutineToggle";
+import { SkillDistillRoutineToggle } from "@/components/SkillDistillRoutineToggle";
 import { WeeklyDigestRoutineToggle } from "@/components/WeeklyDigestRoutineToggle";
 import { isEmailConfigured } from "@/lib/email/emailer";
 import { SettingsBodyFallback } from "@/components/RouteFallback";
@@ -51,6 +52,11 @@ async function AiIntegrationsBody() {
           </h2>
           <DailySummaryRoutineToggle
             enabled={activeOrg.dailySummaryEnabled}
+            hasAiKey={hasValidatedKey}
+            canManage={role === "owner"}
+          />
+          <SkillDistillRoutineToggle
+            enabled={activeOrg.skillDistillEnabled}
             hasAiKey={hasValidatedKey}
             canManage={role === "owner"}
           />
