@@ -203,7 +203,7 @@ Skills + remote MCP for Claude Code and Cowork.
 From a checkout of this repo after \`npm run plugins:publish:claude\`:
 
 \`\`\`bash
-claude plugin marketplace add .
+claude plugin marketplace add ./
 claude plugin install penopta@penopta-claude
 \`\`\`
 
@@ -311,7 +311,7 @@ async function main(): Promise<void> {
   console.log(`  mcp     ${config.mcpUrl}`);
   console.log("");
   console.log("Next:");
-  console.log("  1. claude plugin marketplace add .");
+  console.log("  1. claude plugin marketplace add ./");
   console.log("  2. claude plugin install penopta@penopta-claude");
   console.log("  3. Approve Sign in with Penopta, then run /penopta-context or ask to verify.");
   console.log("Directory listing: follow the local maintainer checklist.");
