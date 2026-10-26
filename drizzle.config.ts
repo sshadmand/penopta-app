@@ -1,6 +1,6 @@
 import { defineConfig } from "drizzle-kit";
 
-//bump
+//bump 2
 export default defineConfig({
   dialect: "postgresql",
   schema: "./src/lib/db/schema.ts",
